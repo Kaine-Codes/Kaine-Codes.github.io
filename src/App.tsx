@@ -572,7 +572,7 @@ export default function App() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <header className="fixed top-0 w-full z-[100] h-20 bg-white border-b-4 border-slate-900 flex justify-between items-center px-6 md:px-12 shadow-md">
+          <header className="fixed top-0 w-full z-[100] h-20 bg-white/40 backdrop-blur-md border-b-4 border-slate-900 flex justify-between items-center px-6 md:px-12 shadow-md">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-[#e53935] border-2 border-slate-900 shadow-[2px_2px_0px_0px_#b71c1c]" />
               <span className="text-xl font-black tracking-tighter text-slate-900 uppercase">SHINE//ECE</span>
