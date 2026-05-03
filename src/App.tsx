@@ -174,7 +174,7 @@ const LegoSection = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="inline-block px-4 py-2 bg-[#ffeb3b] text-slate-900 font-bold rounded-lg shadow-[4px_4px_0px_0px_#fbc02d] border-2 border-slate-900 uppercase text-xs tracking-wider"
           >
             Electronics Enthusiast // ECE 
@@ -183,7 +183,7 @@ const LegoSection = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             transition={{ delay: 0.1 }}
             className="space-y-4"
           >
@@ -198,7 +198,7 @@ const LegoSection = () => {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             transition={{ delay: 0.2 }}
             className="text-slate-800 text-2xl max-w-3xl font-medium leading-relaxed bg-white/40 backdrop-blur-sm p-8 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.05)]"
           >
@@ -208,7 +208,7 @@ const LegoSection = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             transition={{ delay: 0.3 }}
             className="flex flex-wrap gap-8 pt-4"
           >
@@ -303,7 +303,7 @@ const MinecraftSection = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           className="mb-20 flex flex-col md:flex-row justify-between items-center md:items-end gap-8"
         >
           <div className="flex items-center gap-6">
@@ -328,7 +328,7 @@ const MinecraftSection = () => {
               key={exp.title}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
+              viewport={{ once: false }}
               transition={{ delay: i * 0.1 }}
               className="bg-[#3d2b1f] p-8 border-4 border-slate-900 shadow-[inset_4px_4px_0px_0px_rgba(255,255,255,0.05),inset_-4px_-4px_0px_0px_rgba(0,0,0,0.4)] flex flex-col sm:flex-row gap-8 items-center sm:items-start group hover:bg-[#523d2d] transition-colors"
             >
@@ -382,7 +382,7 @@ const SchematicSection = () => {
               key={proj.id}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: false }}
               transition={{ delay: i * 0.1 }}
               className="group border border-emerald-500/20 bg-emerald-950/10 p-8 hover:bg-emerald-500/5 hover:border-emerald-500/40 transition-all relative overflow-hidden"
             >
@@ -436,8 +436,8 @@ const InterestsSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           className="mb-20 text-center"
         >
-          <span className="text-[10px] uppercase tracking-[0.5em] text-emerald-500/40 font-bold block mb-4">SECTION_04 // DOMAIN_FOCUS</span>
-          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter">Fields of Interest</h2>
+          <span className="text-[10px] uppercase tracking-[0.5em] text-emerald-500/40 font-bold block mb-4">SECTION_04 // GUNS OF KNOWLEDGE</span>
+          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter">Technical Arsenal</h2>
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -446,10 +446,11 @@ const InterestsSection = () => {
               key={item.title}
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
+              viewport={{ once: false }}
               transition={{ delay: i * 0.1 }}
-              className="p-10 bg-emerald-950/10 border border-emerald-500/10 flex flex-col items-center text-center group hover:bg-emerald-500/5 hover:border-emerald-500/30 transition-all"
+              className="p-10 bg-black border border-white/10 rounded-2xl flex flex-col items-center text-center group hover:bg-white/5 hover:border-emerald-500/50 transition-all shadow-xl"
             >
-              <div className="p-5 rounded-full bg-black/40 border border-emerald-500/20 mb-6 group-hover:scale-110 transition-transform">
+              <div className="p-5 rounded-full bg-[#111111] border border-emerald-500/20 mb-6 group-hover:scale-110 transition-transform">
                 {React.cloneElement(item.icon as React.ReactElement, { className: 'text-emerald-400' })}
               </div>
               <h3 className="text-white font-mono font-bold uppercase tracking-widest">{item.title}</h3>
