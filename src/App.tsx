@@ -297,7 +297,7 @@ const MinecraftSection = () => {
       }} />
       
       {/* Color transition to next section */}
-      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-black pointer-events-none z-10" />
+      <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-[#111111] pointer-events-none z-10" />
 
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         <motion.div
@@ -308,7 +308,7 @@ const MinecraftSection = () => {
         >
           <div className="flex items-center gap-6">
             <div>
-              <h2 className="text-4xl md:text-5xl font-black uppercase tracking-widest text-[#10b981] mb-2 leading-none font-minecraft">Experiences</h2>
+              <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-[#10b981] mb-2 leading-none font-minecraft [text-shadow:4px_4px_0px_rgba(0,0,0,0.4)]">Experiences</h2>
               <p className="text-stone-400 text-[12px] tracking-widest uppercase font-minecraft">Enchantment_Level XXX// Professional_Experience</p>
             </div>
           </div>
@@ -364,7 +364,6 @@ const SchematicSection = () => {
         backgroundImage: `linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px)`,
         backgroundSize: '80px 80px'
       }} />
-
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         <motion.div
            initial={{ opacity: 0 }}
@@ -427,6 +426,10 @@ const InterestsSection = () => {
 
   return (
     <section id="interests" className="py-32 bg-[#111111] border-t border-emerald-500/10 relative overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.05]" style={{
+        backgroundImage: `linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px)`,
+        backgroundSize: '80px 80px'
+      }} />
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -434,7 +437,7 @@ const InterestsSection = () => {
           className="mb-20 text-center"
         >
           <span className="text-[10px] uppercase tracking-[0.5em] text-emerald-500/40 font-bold block mb-4">SECTION_04 // DOMAIN_FOCUS</span>
-          <h2 className="text-5xl font-black text-white uppercase tracking-tighter">Fields of Interest</h2>
+          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter">Fields of Interest</h2>
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -469,6 +472,10 @@ const ContactSection = () => {
 
   return (
     <section id="contact" className="py-32 bg-[#111111] relative overflow-hidden">
+      <div className="absolute inset-0 opacity-[0.05]" style={{
+        backgroundImage: `linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px)`,
+        backgroundSize: '80px 80px'
+      }} />
       <div className="absolute inset-0 opacity-[0.03]" style={{
         backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
         backgroundSize: '40px 40px'
@@ -481,7 +488,7 @@ const ContactSection = () => {
           className="mb-20 text-center"
         >
           <span className="text-[10px] uppercase tracking-[0.5em] text-emerald-500/40 font-bold block mb-4">SECTION_05 // COMMS_ESTABLISHED</span>
-          <h2 className="text-5xl font-black text-white uppercase tracking-tighter">Get In Touch</h2>
+          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter">Get In Touch</h2>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
