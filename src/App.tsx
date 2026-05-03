@@ -187,8 +187,63 @@ const LegoSection = () => {
             transition={{ delay: 0.1 }}
             className="space-y-4"
           >
-            <h1 className="font-sans text-7xl md:text-9xl font-black text-slate-900 leading-none tracking-tighter uppercase">
-              SHINE <span className="text-[#1e88e5]">DANIEL</span>
+            <h1 className="font-sans text-7xl md:text-9xl font-black text-slate-900 leading-none tracking-tighter uppercase relative">
+              <span className="relative inline-block">
+                <span className="relative z-10">
+                  SHINE
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: false }}
+                    className="absolute inset-0 pointer-events-none"
+                  >
+                    {[...Array(6)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute"
+                        initial={{ scale: 0, opacity: 0, rotate: 0 }}
+                        whileInView={{ 
+                          scale: [0, 1.2, 0],
+                          opacity: [0, 1, 0],
+                          rotate: [0, 90, 180]
+                        }}
+                        viewport={{ once: false }}
+                        transition={{ 
+                          duration: 1.5,
+                          repeat: Infinity,
+                          repeatDelay: Math.random() * 2,
+                          delay: i * 0.2
+                        }}
+                        style={{
+                          top: `${[10, 40, 80, 20, 70, 50][i]}%`,
+                          left: `${[10, 85, 30, 75, 15, 60][i]}%`,
+                        }}
+                      >
+                        <svg width="16" height="16" viewBox="0 0 10 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" fill="#FACC15" />
+                        </svg>
+                      </motion.div>
+                    ))}
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent z-10"
+                      initial={{ x: '-100%', opacity: 1 }}
+                      whileInView={{ 
+                        x: ['-100%', '60%'],
+                        opacity: [1, 1, 0]
+                      }}
+                      viewport={{ once: false }}
+                      transition={{ 
+                        duration: 1.2, 
+                        times: [0, 0.6, 1],
+                        repeat: 0, 
+                        repeatDelay: 2, 
+                        ease: "easeInOut" 
+                      }}
+                    />
+                  </motion.div>
+                </span>
+              </span>
+              <span className="ml-4 text-[#1e88e5]">DANIEL</span>
             </h1>
             <p className="text-3xl md:text-4xl font-bold text-[#e53935] uppercase font-sans tracking-tight">
               Aspiring VLSI & Embedded Systems Engineer
@@ -492,7 +547,7 @@ const ContactSection = () => {
           <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter">Get In Touch</h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <motion.button 
             onClick={() => copyToClipboard('shine.kaine2249@gmail.com', 'email')}
             initial={{ opacity: 0, y: 20 }}
@@ -501,19 +556,7 @@ const ContactSection = () => {
             className="p-8 bg-black/40 border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-emerald-500/60 hover:bg-emerald-500/5 transition-all group relative cursor-pointer"
           >
             <Mail className="w-8 h-8 text-emerald-400 mb-4 group-hover:scale-110 transition-transform" />
-            <span className="text-white text-sm font-medium">{copied === 'email' ? 'Copied!' : 'shine.kaine2249@gmail.com'}</span>
-            <div className="absolute bottom-4 text-[9px] uppercase tracking-widest text-white/20 font-bold opacity-0 group-hover:opacity-100 transition-opacity">Click to copy</div>
-          </motion.button>
-
-          <motion.button 
-            onClick={() => copyToClipboard('+91 6235415041', 'phone')}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="p-8 bg-black/40 border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-emerald-500/60 hover:bg-emerald-500/5 transition-all group relative cursor-pointer"
-          >
-            <Phone className="w-8 h-8 text-emerald-400 mb-4 group-hover:scale-110 transition-transform" />
-            <span className="text-white text-sm font-medium">{copied === 'phone' ? 'Copied!' : '+91 6235415041'}</span>
+            <span className="text-white text-sm font-medium">{copied === 'email' ? 'Copied!' : 'Mail'}</span>
             <div className="absolute bottom-4 text-[9px] uppercase tracking-widest text-white/20 font-bold opacity-0 group-hover:opacity-100 transition-opacity">Click to copy</div>
           </motion.button>
 
