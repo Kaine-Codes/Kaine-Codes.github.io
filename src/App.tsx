@@ -74,9 +74,10 @@ const TerminalScreen = ({ onComplete }: { onComplete: () => void; key?: string }
     "> INITIALIZING ECE_PORTFOLIO_V2...",
     "> LOADING CIRCUIT_SCHEMATICS [OK]",
     "> VERIFYING SIGNAL_INTEGRITY [98.2%]",
-    "> FETCHING SHINE_DANIEL.EXE...",
     "> SYNCHRONIZING HARDWARE_STACK...",
-    "> EXECUTING MAIN_BOOT_SEQUENCE..."
+    "> EXECUTING MAIN_BOOT_SEQUENCE...",
+    "> FETCHING SHINE_DANIEL.EXE...",
+
   ];
 
   useEffect(() => {
@@ -113,7 +114,7 @@ const TerminalScreen = ({ onComplete }: { onComplete: () => void; key?: string }
             <div className="w-3 h-3 rounded-full bg-[#e7c365]" />
             <div className="w-3 h-3 rounded-full bg-[#10b981]" />
           </div>
-          <span className="text-emerald-500/30 text-[10px] tracking-widest uppercase font-bold">ECE_CORE // V2.0</span>
+          <span className="text-emerald-500/30 text-[10px] tracking-widest uppercase font-bold">ECE_CORE // V2.0 </span>
         </div>
 
         <div className="space-y-4 text-emerald-400">
@@ -190,7 +191,7 @@ const LegoSection = () => {
               SHINE <span className="text-[#1e88e5]">DANIEL</span>
             </h1>
             <p className="text-3xl md:text-4xl font-bold text-[#e53935] uppercase font-sans tracking-tight">
-              Hardware Design & Signal Integrity
+              Aspiring VLSI & Embedded Systems Engineer
             </p>
           </motion.div>
 
@@ -199,7 +200,7 @@ const LegoSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-slate-800 text-xl max-w-2xl font-medium leading-relaxed bg-white/40 backdrop-blur-sm p-8 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.05)]"
+            className="text-slate-800 text-2xl max-w-3xl font-medium leading-relaxed bg-white/40 backdrop-blur-sm p-8 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.05)]"
           >
             Proactive Electronics enthusiast who loves to work on projects, gain knowledge and practical skills while building connections with like-minded individuals. I help shape a better future for Electronauts.
           </motion.p>
@@ -284,7 +285,7 @@ const MinecraftSection = () => {
   ];
 
   return (
-    <section id="experience" className="min-h-screen py-32 bg-[#4a3424] text-white relative font-pixel overflow-hidden">
+    <section id="experience" className="min-h-screen py-32 bg-[#4a3424] text-white relative overflow-hidden">
       {/* Darkened Dirt Background */}
       <div className="absolute inset-0 opacity-40 pointer-events-none mix-blend-multiply" style={{
         backgroundImage: `url('https://www.transparenttextures.com/patterns/dark-matter.png')`,
@@ -307,8 +308,8 @@ const MinecraftSection = () => {
         >
           <div className="flex items-center gap-6">
             <div>
-              <h2 className="text-4xl md:text-5xl font-black uppercase tracking-widest text-[#10b981] mb-2 leading-none">Experiences</h2>
-              <p className="text-stone-400 text-[10px] tracking-widest uppercase">Inventory_v2 // WORK_VOLUNTEERING</p>
+              <h2 className="text-4xl md:text-5xl font-black uppercase tracking-widest text-[#10b981] mb-2 leading-none font-minecraft">Experiences</h2>
+              <p className="text-stone-400 text-[12px] tracking-widest uppercase font-minecraft">Enchantment_Level XXX// Professional_Experience</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -335,8 +336,8 @@ const MinecraftSection = () => {
                 <img src={exp.img} alt={exp.icon} className="w-full h-full object-contain -mt-[2px]" />
               </div>
               <div className="text-center sm:text-left">
-                <h3 className="text-xl font-bold mb-1 text-white uppercase">{exp.title}</h3>
-                <p className="text-[#10b981] text-xs mb-4 uppercase tracking-[0.2em]">@{exp.sub}</p>
+                <h3 className="text-xl font-bold mb-1 text-white uppercase font-minecraft">{exp.title}</h3>
+                <p className="text-[#10b981] text-xs mb-4 uppercase tracking-[0.2em] font-minecraft">@{exp.sub}</p>
                 <p className="text-stone-300 text-xs leading-relaxed font-sans font-medium">{exp.desc}</p>
               </div>
             </motion.div>
@@ -358,7 +359,7 @@ const SchematicSection = () => {
   ];
 
   return (
-    <section id="projects" className="min-h-screen py-32 bg-black text-emerald-500 font-sans relative overflow-hidden">
+    <section id="projects" className="min-h-screen py-32 bg-[#111111] text-emerald-500 font-sans relative overflow-hidden">
       <div className="absolute inset-0 opacity-[0.05]" style={{
         backgroundImage: `linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px)`,
         backgroundSize: '80px 80px'
@@ -425,7 +426,7 @@ const InterestsSection = () => {
   ];
 
   return (
-    <section id="interests" className="py-32 bg-black border-t border-emerald-500/10 relative overflow-hidden">
+    <section id="interests" className="py-32 bg-[#111111] border-t border-emerald-500/10 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -467,7 +468,7 @@ const ContactSection = () => {
   };
 
   return (
-    <section id="contact" className="py-32 bg-stone-900 relative overflow-hidden">
+    <section id="contact" className="py-32 bg-[#111111] relative overflow-hidden">
       <div className="absolute inset-0 opacity-[0.03]" style={{
         backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
         backgroundSize: '40px 40px'
@@ -543,10 +544,39 @@ const ContactSection = () => {
 
 export default function App() {
   const [state, setState] = useState<AppState>('loading');
+  const [activeSection, setActiveSection] = useState('intro');
 
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    if (state !== 'portfolio') return;
+
+    const observerOptions = {
+      root: null,
+      rootMargin: '-20% 0px -70% 0px',
+      threshold: 0
+    };
+
+    const observerCallback = (entries: IntersectionObserverEntry[]) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setActiveSection(entry.target.id);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    const sections = ['intro', 'experience', 'projects', 'interests', 'contact'];
+    
+    sections.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, [state]);
 
   return (
     <div className="min-h-screen bg-slate-50 selection:bg-emerald-500 selection:text-black">
@@ -561,9 +591,9 @@ export default function App() {
 
       {state === 'portfolio' && (
         <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
+           initial={{ opacity: 0, y: 10 }}
+           animate={{ opacity: 1, y: 0 }}
+           transition={{ duration: 0.8, ease: "easeOut" }}
         >
           <header className="fixed top-0 w-full z-[100] h-20 bg-white/40 backdrop-blur-md border-b-4 border-slate-900 flex justify-between items-center px-6 md:px-12 shadow-md">
             <div className="flex items-center gap-2">
@@ -571,43 +601,49 @@ export default function App() {
               <span className="text-xl font-black tracking-tighter text-slate-900 uppercase">SHINE//ECE</span>
             </div>
             
-            <nav className="hidden lg:flex items-center gap-4 uppercase font-bold text-[10px] tracking-widest">
+            <nav className="hidden lg:flex items-center gap-4 uppercase font-bold text-[10px] tracking-widest leading-none">
               <button 
                 onClick={() => scrollToSection('intro')} 
-                className="px-4 py-2 text-black hover:text-white hover:bg-black transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
+                className={`px-4 py-2 transition-all rounded cursor-pointer hover:scale-110 active:scale-95 uppercase border-2 ${
+                  activeSection === 'intro' ? 'border-slate-900 text-slate-900 bg-white/50' : 'border-transparent text-black hover:text-white hover:bg-black'
+                }`}
               >
                 About
               </button>
               <button 
                 onClick={() => scrollToSection('experience')} 
-                className="px-4 py-2 text-black hover:text-white hover:bg-black transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
+                className={`px-4 py-2 transition-all rounded cursor-pointer hover:scale-110 active:scale-95 uppercase border-2 ${
+                  activeSection === 'experience' ? 'border-slate-900 text-slate-900 bg-white/50' : 'border-transparent text-black hover:text-white hover:bg-black'
+                }`}
               >
                 Experience
               </button>
               <button 
                 onClick={() => scrollToSection('projects')} 
-                className="px-4 py-2 text-black hover:text-white hover:bg-black transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
+                className={`px-4 py-2 transition-all rounded cursor-pointer hover:scale-110 active:scale-95 uppercase border-2 ${
+                  activeSection === 'projects' ? 'border-slate-900 text-slate-900 bg-white/50' : 'border-transparent text-black hover:text-white hover:bg-black'
+                }`}
               >
                 Projects
               </button>
               <button 
                 onClick={() => scrollToSection('interests')} 
-                className="px-4 py-2 text-black hover:text-white hover:bg-black transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
+                className={`px-4 py-2 transition-all rounded cursor-pointer hover:scale-110 active:scale-95 uppercase border-2 ${
+                  activeSection === 'interests' ? 'border-slate-900 text-slate-900 bg-white/50' : 'border-transparent text-black hover:text-white hover:bg-black'
+                }`}
               >
                 Skills
-              </button>
-              <button 
-                onClick={() => scrollToSection('contact')} 
-                className="px-4 py-2 text-black hover:text-white hover:bg-black transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
-              >
-                Contact
               </button>
             </nav>
 
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => scrollToSection('contact')}
-                className="bg-[#e53935] text-white px-6 h-10 flex items-center font-black rounded border-2 border-slate-900 uppercase text-[10px] shadow-[3px_3px_0px_0px_#b71c1c] active:translate-y-1 active:shadow-none transition-all cursor-pointer hover:scale-105"
+                className={`flex items-center font-black rounded border-2 border-slate-900 uppercase text-[10px] transition-all cursor-pointer hover:scale-105 px-6 h-10 ${
+                  activeSection === 'contact' 
+                    ? 'bg-white text-slate-900 border-4 shadow-none' 
+                    : 'bg-[#e53935] text-white shadow-[3px_3px_0px_0px_#b71c1c] active:translate-y-1 active:shadow-none'
+                }`}
               >
                 Connect
               </button>
@@ -633,8 +669,8 @@ export default function App() {
                   <span>© SHINE DANIEL // ECE // 2026</span>
                 </div>
                 <div className="flex gap-8">
-                  <span>SYSTEM_STATE: OPERATIONAL</span>
-                  <span>ENCRYPTION: AES-256</span>
+                  <span>MENTAL_STATE: OPERATIONAL</span>
+                  <span>ENCRYPTION: GENZ-256</span>
                 </div>
               </div>
             </div>
