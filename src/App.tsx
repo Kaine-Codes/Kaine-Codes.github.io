@@ -555,16 +555,20 @@ export default function App() {
 
     const observerOptions = {
       root: null,
-      rootMargin: '-20% 0px -70% 0px',
-      threshold: 0
+      rootMargin: '-10% 0px -30% 0px',
+      threshold: [0, 0.1, 0.5]
     };
 
     const observerCallback = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          setActiveSection(entry.target.id);
-        }
-      });
+      // Find the entry with the highest intersection ratio or the one currently in view
+      const visibleEntries = entries.filter(e => e.isIntersecting);
+      if (visibleEntries.length > 0) {
+        // Sort by intersection ratio to get the most visible one
+        const bestEntry = visibleEntries.reduce((prev, curr) => 
+          curr.intersectionRatio > prev.intersectionRatio ? curr : prev
+        );
+        setActiveSection(bestEntry.target.id);
+      }
     };
 
     const observer = new IntersectionObserver(observerCallback, observerOptions);
@@ -595,17 +599,23 @@ export default function App() {
            animate={{ opacity: 1, y: 0 }}
            transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <header className="fixed top-0 w-full z-[100] h-20 bg-white/40 backdrop-blur-md border-b-4 border-slate-900 flex justify-between items-center px-6 md:px-12 shadow-md">
+          <header className={`fixed top-0 w-full z-[100] h-20 backdrop-blur-md border-b-4 flex justify-between items-center px-6 md:px-12 shadow-md transition-colors duration-300 ${
+            activeSection === 'contact' ? 'bg-black/80 border-white/20' : 'bg-white/40 border-slate-900'
+          }`}>
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 bg-[#e53935] border-2 border-slate-900 shadow-[2px_2px_0px_0px_#b71c1c]" />
-              <span className="text-xl font-black tracking-tighter text-slate-900 uppercase">SHINE//ECE</span>
+              <span className={`text-xl font-black tracking-tighter uppercase transition-colors ${
+                activeSection === 'contact' ? 'text-white' : 'text-slate-900'
+              }`}>SHINE//ECE</span>
             </div>
             
             <nav className="hidden lg:flex items-center gap-4 uppercase font-bold text-[10px] tracking-widest leading-none">
               <button 
                 onClick={() => scrollToSection('intro')} 
                 className={`px-4 py-2 transition-all rounded cursor-pointer hover:scale-110 active:scale-95 uppercase border-2 ${
-                  activeSection === 'intro' ? 'border-slate-900 text-slate-900 bg-white/50' : 'border-transparent text-black hover:text-white hover:bg-black'
+                  activeSection === 'intro' 
+                    ? 'border-slate-900 text-slate-900 bg-white/50' 
+                    : activeSection === 'contact' ? 'border-transparent text-white/60 hover:text-white hover:bg-white/10' : 'border-transparent text-black hover:text-white hover:bg-black'
                 }`}
               >
                 About
@@ -613,7 +623,9 @@ export default function App() {
               <button 
                 onClick={() => scrollToSection('experience')} 
                 className={`px-4 py-2 transition-all rounded cursor-pointer hover:scale-110 active:scale-95 uppercase border-2 ${
-                  activeSection === 'experience' ? 'border-slate-900 text-slate-900 bg-white/50' : 'border-transparent text-black hover:text-white hover:bg-black'
+                  activeSection === 'experience' 
+                    ? 'border-slate-900 text-slate-900 bg-white/50' 
+                    : activeSection === 'contact' ? 'border-transparent text-white/60 hover:text-white hover:bg-white/10' : 'border-transparent text-black hover:text-white hover:bg-black'
                 }`}
               >
                 Experience
@@ -621,7 +633,9 @@ export default function App() {
               <button 
                 onClick={() => scrollToSection('projects')} 
                 className={`px-4 py-2 transition-all rounded cursor-pointer hover:scale-110 active:scale-95 uppercase border-2 ${
-                  activeSection === 'projects' ? 'border-slate-900 text-slate-900 bg-white/50' : 'border-transparent text-black hover:text-white hover:bg-black'
+                  activeSection === 'projects' 
+                    ? 'border-slate-900 text-slate-900 bg-white/50' 
+                    : activeSection === 'contact' ? 'border-transparent text-white/60 hover:text-white hover:bg-white/10' : 'border-transparent text-black hover:text-white hover:bg-black'
                 }`}
               >
                 Projects
@@ -629,7 +643,9 @@ export default function App() {
               <button 
                 onClick={() => scrollToSection('interests')} 
                 className={`px-4 py-2 transition-all rounded cursor-pointer hover:scale-110 active:scale-95 uppercase border-2 ${
-                  activeSection === 'interests' ? 'border-slate-900 text-slate-900 bg-white/50' : 'border-transparent text-black hover:text-white hover:bg-black'
+                  activeSection === 'interests' 
+                    ? 'border-slate-900 text-slate-900 bg-white/50' 
+                    : activeSection === 'contact' ? 'border-transparent text-white/60 hover:text-white hover:bg-white/10' : 'border-transparent text-black hover:text-white hover:bg-black'
                 }`}
               >
                 Skills
@@ -639,10 +655,10 @@ export default function App() {
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => scrollToSection('contact')}
-                className={`flex items-center font-black rounded border-2 border-slate-900 uppercase text-[10px] transition-all cursor-pointer hover:scale-105 px-6 h-10 ${
+                className={`flex items-center font-black rounded border-2 uppercase text-[10px] transition-all cursor-pointer hover:scale-105 px-6 h-10 ${
                   activeSection === 'contact' 
-                    ? 'bg-white text-slate-900 border-4 shadow-none' 
-                    : 'bg-[#e53935] text-white shadow-[3px_3px_0px_0px_#b71c1c] active:translate-y-1 active:shadow-none'
+                    ? 'bg-[#e53935] text-white border-white shadow-[0px_0px_15px_rgba(255,255,255,0.3)]' 
+                    : 'bg-[#e53935] text-white border-slate-900 shadow-[3px_3px_0px_0px_#b71c1c] active:translate-y-1 active:shadow-none'
                 }`}
               >
                 Connect
