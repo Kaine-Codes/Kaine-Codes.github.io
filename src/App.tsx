@@ -553,33 +553,40 @@ export default function App() {
   useEffect(() => {
     if (state !== 'portfolio') return;
 
-    const observerOptions = {
-      root: null,
-      rootMargin: '-10% 0px -30% 0px',
-      threshold: [0, 0.1, 0.5]
-    };
-
-    const observerCallback = (entries: IntersectionObserverEntry[]) => {
-      // Find the entry with the highest intersection ratio or the one currently in view
-      const visibleEntries = entries.filter(e => e.isIntersecting);
-      if (visibleEntries.length > 0) {
-        // Sort by intersection ratio to get the most visible one
-        const bestEntry = visibleEntries.reduce((prev, curr) => 
-          curr.intersectionRatio > prev.intersectionRatio ? curr : prev
-        );
-        setActiveSection(bestEntry.target.id);
+    const handleScroll = () => {
+      const sections = ['intro', 'experience', 'projects', 'interests', 'contact'];
+      
+      // Check if we're near the bottom of the page first (for Contact section)
+      const scrollPosition = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const fullHeight = document.documentElement.scrollHeight;
+      
+      if (scrollPosition + windowHeight >= fullHeight - 100) {
+        setActiveSection('contact');
+        return;
       }
+
+      // Otherwise, find the current section based on scroll position
+      let current = 'intro';
+      for (const id of sections) {
+        const element = document.getElementById(id);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          // We consider a section active if its top is within the upper part of the viewport
+          if (rect.top <= 160) {
+            current = id;
+          }
+        }
+      }
+      
+      setActiveSection(current);
     };
 
-    const observer = new IntersectionObserver(observerCallback, observerOptions);
-    const sections = ['intro', 'experience', 'projects', 'interests', 'contact'];
-    
-    sections.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    // Run once on mount to set initial state
+    handleScroll();
 
-    return () => observer.disconnect();
+    return () => window.removeEventListener('scroll', handleScroll);
   }, [state]);
 
   return (
