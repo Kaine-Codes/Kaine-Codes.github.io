@@ -358,7 +358,7 @@ const SchematicSection = () => {
   ];
 
   return (
-    <section id="projects" className="min-h-screen py-32 bg-black text-emerald-500 font-mono relative overflow-hidden">
+    <section id="projects" className="min-h-screen py-32 bg-black text-emerald-500 font-sans relative overflow-hidden">
       <div className="absolute inset-0 opacity-[0.05]" style={{
         backgroundImage: `linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px)`,
         backgroundSize: '80px 80px'
@@ -370,16 +370,9 @@ const SchematicSection = () => {
            whileInView={{ opacity: 1 }}
            className="mb-24 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-emerald-500/20 pb-10"
         >
-          <div className="space-y-2">
+          <div className="space-y-4">
             <span className="text-[10px] uppercase tracking-[0.4em] text-emerald-500/40 font-bold block">SECTION_03 // HW_ARCH</span>
-            <h2 className="text-5xl md:text-6xl font-bold uppercase tracking-tighter text-white">Project Schematics</h2>
-          </div>
-          <div className="text-left md:text-right space-y-2 mt-6 md:mt-0">
-            <div className="text-[11px] text-emerald-500/40 flex items-center gap-3 md:justify-end">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_#10b981] animate-pulse" />
-              PROBE_ACTIVE
-            </div>
-            <div className="text-xs text-emerald-500/60 uppercase tracking-widest">BUILD_STATE: STABLE_V4</div>
+            <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white">Project Schematics</h2>
           </div>
         </motion.div>
 
@@ -581,31 +574,31 @@ export default function App() {
             <nav className="hidden lg:flex items-center gap-4 uppercase font-bold text-[10px] tracking-widest">
               <button 
                 onClick={() => scrollToSection('intro')} 
-                className="px-4 py-2 text-slate-500 hover:text-white hover:bg-slate-900 transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
+                className="px-4 py-2 text-black hover:text-white hover:bg-black transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
               >
                 About
               </button>
               <button 
                 onClick={() => scrollToSection('experience')} 
-                className="px-4 py-2 text-slate-500 hover:text-white hover:bg-slate-900 transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
+                className="px-4 py-2 text-black hover:text-white hover:bg-black transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
               >
                 Experience
               </button>
               <button 
                 onClick={() => scrollToSection('projects')} 
-                className="px-4 py-2 text-slate-500 hover:text-white hover:bg-slate-900 transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
+                className="px-4 py-2 text-black hover:text-white hover:bg-black transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
               >
                 Projects
               </button>
               <button 
                 onClick={() => scrollToSection('interests')} 
-                className="px-4 py-2 text-slate-500 hover:text-white hover:bg-slate-900 transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
+                className="px-4 py-2 text-black hover:text-white hover:bg-black transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
               >
                 Skills
               </button>
               <button 
                 onClick={() => scrollToSection('contact')} 
-                className="px-4 py-2 text-slate-500 hover:text-white hover:bg-slate-900 transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
+                className="px-4 py-2 text-black hover:text-white hover:bg-black transition-all rounded cursor-pointer hover:scale-110 active:scale-95"
               >
                 Contact
               </button>
@@ -632,7 +625,7 @@ export default function App() {
           <footer className="bg-[#0a0a0a] py-20 text-slate-500 font-mono border-t border-white/5">
             <div className="max-w-7xl mx-auto px-6 md:px-12 text-center">
               <div className="mb-12">
-                <div className="text-8xl font-black text-white/5 select-none leading-none">SHINE DANIEL ;D</div>
+                <div className="text-8xl font-black text-white/5 select-none leading-none">Lets Cook ;D</div>
               </div>
               <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] uppercase font-bold tracking-[0.4em]">
                 <div className="flex items-center gap-4">
