@@ -148,6 +148,7 @@ const TerminalScreen = ({ onComplete }: { onComplete: () => void; key?: string }
 // --- Portfolio Sections ---
 
 const LegoSection = () => {
+  const [isCircuitOn, setIsCircuitOn] = useState(false);
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -185,10 +186,87 @@ const LegoSection = () => {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false }}
             transition={{ delay: 0.1 }}
-            className="space-y-4"
+            className="space-y-4 relative"
           >
-            <h1 className="font-sans text-7xl md:text-9xl font-black text-slate-900 leading-none tracking-tighter uppercase relative">
-              <span className="relative inline-block">
+            {/* SVG Circuit Overlay */}
+            <svg 
+              className="absolute -inset-x-12 -inset-y-12 w-[calc(100%+6rem)] h-[calc(100%+8rem)] pointer-events-none z-0 overflow-visible" 
+              viewBox="0 0 1150 500" 
+              preserveAspectRatio="none"
+            >
+              <defs>
+                <filter id="glow-wire">
+                  <feGaussianBlur stdDeviation="2.5" result="blur" />
+                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                </filter>
+                <filter id="wire-lit-glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="4" result="blur" />
+                  <feColorMatrix type="matrix" values="0 0 0 0 1   0 0 0 0 0.8  0 0 0 0 0  0 0 0 1 0" />
+                  <feMerge>
+                    <feMergeNode />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+              
+              {/* The Wire Path */}
+              {/* Path: coming out the right of "DANIEL", through the resistor, to the switch, then running leftwards directly to the side of the red text */}
+              {/* The wire will now stay black and will not glow when the switch is flipped */}
+              <g className="transition-all duration-300" stroke="#080808" filter="url(#glow-wire)">
+                {/* Out of DANIEL (Right Side) */}
+                <path 
+                  d="M 1150,160 L 1350,160 " 
+                  fill="none" strokeWidth="6" strokeLinecap="round" 
+                />
+                
+                {/* IEEE Resistor */}
+                <path 
+                  d="M 1350,160 L 1350,185 L 1335,195 L 1365,205 L 1335,215 L 1365,225 L 1335,235 L 1365,245 L 1350,255 L 1350,285" 
+                  fill="none" strokeWidth="6" strokeLinejoin="round" 
+                />
+                
+                <path 
+                  d="M 1350,285 L 1250,285" 
+                  fill="none" strokeWidth="6" strokeLinecap="round" 
+                />
+                
+                {/* IEEE Switch Terminals */}
+                <circle cx="1200" cy="285" r="5" fill="none" strokeWidth="4" />
+                <circle cx="1250" cy="285" r="5" fill="none" strokeWidth="4" />
+                
+                {/* Switch Toggle Arm */}
+                <path 
+                  d={isCircuitOn ? "M 1200,285 L 1250,285" : "M 1200,285 L 1235,255"}
+                  fill="none" strokeWidth="6" strokeLinecap="round" 
+                  className="pointer-events-none"
+                />
+
+                {/* Invisible Hitbox for Switch */}
+                <rect 
+                  x="1170" y="250" 
+                  width="110" height="60" 
+                  fill="transparent" 
+                  stroke="none"
+                  className="pointer-events-auto cursor-pointer"
+                  onClick={() => setIsCircuitOn(!isCircuitOn)}
+                />
+                
+                {/* Wire coming FROM the switch, plugging into the RIGHT side of the sentence */}
+                <path 
+                  d="M 1200,285 L 1130,285"  
+                  fill="none" strokeWidth="6" strokeLinecap="round" 
+                />
+
+                {/* Wire starting at the LEFT side of the sentence, going up to DANIEL */}
+                <path 
+                  d="M 50,285 L 30,285 L 30,203 L 540,203 L 540,107" 
+                  fill="none" strokeWidth="6" strokeLinecap="round" 
+                />
+              </g>
+            </svg>
+
+            <h1 className="font-sans text-7xl md:text-9xl font-black text-slate-900 leading-none tracking-tighter uppercase relative z-10 flex items-baseline whitespace-nowrap">
+              <span className="relative inline-block shrink-0">
                 <span className="relative z-10">
                   SHINE
                   <motion.div
@@ -243,9 +321,18 @@ const LegoSection = () => {
                   </motion.div>
                 </span>
               </span>
-              <span className="ml-4 text-[#1e88e5]">DANIEL</span>
+              <span 
+                className={`ml-6 md:ml-12 text-9xl md:text-[15rem] normal-case font-cursive transition-all duration-300 tracking-[0.05em] -translate-y-1 ${isCircuitOn ? 'text-amber-400 drop-shadow-[0_0_20px_rgba(251,191,36,0.9)]' : 'text-[#4a3f12]'}`}
+                style={{ 
+                  textShadow: isCircuitOn 
+                    ? '0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fbbf24, 0 0 42px #fbbf24, 0 0 82px #fbbf24, 0 0 92px #fbbf24, 0 0 102px #fbbf24' 
+                    : 'none'
+                }}
+              >
+                DANIEL
+              </span>
             </h1>
-            <p className="text-3xl md:text-4xl font-bold text-[#e53935] uppercase font-sans tracking-tight">
+            <p className=" -translate-y-22 text-3xl md:text-4xl font-bold text-[#e53935] uppercase font-sans tracking-tight relative z-10 whitespace-nowrap">
               Aspiring VLSI & Embedded Systems Engineer
             </p>
           </motion.div>
