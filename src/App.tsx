@@ -322,7 +322,7 @@ const LegoSection = () => {
                 </span>
               </span>
               <span 
-                className={`ml-6 md:ml-12 text-9xl md:text-[15rem] normal-case font-cursive transition-all duration-300 tracking-[0.05em] -translate-y-1 ${isCircuitOn ? 'text-[#f9c941] drop-shadow-[0_0_20px_#fddb3c]' : 'text-[#4a3f12]'}`}
+                className={`ml-6 md:ml-12 text-9xl md:text-[15rem] normal-case font-cursive transition-all duration-300 tracking-[0.05em] -translate-y-1 ${isCircuitOn ? 'text-[#fbbf24] drop-shadow-[0_0_20px_#fddb3c]' : 'text-[#4a3f12]'}`}
                 style={{ 
                   textShadow: isCircuitOn 
                     ? '0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fddb3c, 0 0 42px #fddb3c, 0 0 82px #fddb3c, 0 0 92px #fddb3c, 0 0 102px #fddb3c' 
