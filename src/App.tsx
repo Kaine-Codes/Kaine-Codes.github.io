@@ -215,7 +215,7 @@ const LegoSection = () => {
               <g className="transition-all duration-300" stroke="#080808" filter="url(#glow-wire)">
                 {/* Out of DANIEL (Right Side) */}
                 <path 
-                  d="M 1150,160 L 1350,160 " 
+                  d="M 1070,160 L 1350,160 " 
                   fill="none" strokeWidth="6" strokeLinecap="round" 
                 />
                 
@@ -253,13 +253,13 @@ const LegoSection = () => {
                 
                 {/* Wire coming FROM the switch, plugging into the RIGHT side of the sentence */}
                 <path 
-                  d="M 1200,285 L 1130,285"  
+                  d="M 1200,285 L 1050,285"  
                   fill="none" strokeWidth="6" strokeLinecap="round" 
                 />
 
                 {/* Wire starting at the LEFT side of the sentence, going up to DANIEL */}
                 <path 
-                  d="M 50,285 L 30,285 L 30,203 L 540,203 L 540,107" 
+                  d="M 50,285 L 30,285 L 30,203 L 520,203 L 520,107" 
                   fill="none" strokeWidth="6" strokeLinecap="round" 
                 />
               </g>
