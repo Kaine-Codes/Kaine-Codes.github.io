@@ -2,29 +2,36 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: 'Minecraft';
-  src: url('/mc font/MinecraftRegular-Bmg3.otf') format('opentype');
+  font-family: 'Shalma';
+  src: url('/fonts/Shalma-Rp0Pe.otf') format('opentype');
   font-weight: normal;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Minecraft';
-  src: url('/mc font/MinecraftRegular-Bmg3.otf') format('opentype');
+  src: url('/fonts/MinecraftRegular-Bmg3.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Minecraft';
+  src: url('/fonts/MinecraftBold-nMK1.otf') format('opentype');
   font-weight: bold;
   font-style: normal;
 }
 
 @font-face {
   font-family: 'Minecraft';
-  src: url('/mc font/MinecraftRegular-Bmg3.otf') format('opentype');
+  src: url('/fonts/MinecraftItalic-R8Mo.otf') format('opentype');
   font-weight: normal;
   font-style: italic;
 }
 
 @font-face {
   font-family: 'Minecraft';
-  src: url('/mc font/MinecraftRegular-Bmg3.otf') format('opentype');
+  src: url('/fonts/MinecraftBoldItalic-1y1e.otf') format('opentype');
   font-weight: bold;
   font-style: italic;
 }
@@ -34,6 +41,7 @@
   --font-mono: "Space Grotesk", ui-monospace, SFMono-Regular, monospace;
   --font-pixel: "Silkscreen", cursive;
   --font-minecraft: "Minecraft", cursive;
+  --font-cursive: "Shalma", cursive;
 }
 
 @layer utilities {
