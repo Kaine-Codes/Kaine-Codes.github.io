@@ -149,9 +149,17 @@ const TerminalScreen = ({ onComplete }: { onComplete: () => void; key?: string }
 
 const LegoSection = () => {
   const [isCircuitOn, setIsCircuitOn] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   return (
     <section id="intro" className="min-h-screen pt-32 pb-40 bg-[#fdf7ff] relative overflow-hidden">
@@ -166,7 +174,15 @@ const LegoSection = () => {
           />
         ))}
       </div>
-      
+
+      {/* Brick Color Gradient Overlay — fades bricks from bright top → brown bottom */}
+      <div 
+        className="absolute inset-0 pointer-events-none z-[1]"
+        style={{
+          background: 'linear-gradient(to bottom, rgba(253,247,255,0) 0%, rgba(253,247,255,0) 25%, rgba(139,90,60,0.35) 60%, rgba(74,52,36,0.82) 85%, rgba(74,52,36,1) 100%)'
+        }}
+      />
+
       {/* Darkness Gradient Overlay */}
       <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-[#4a3424] pointer-events-none z-10" />
 
@@ -188,84 +204,89 @@ const LegoSection = () => {
             transition={{ delay: 0.1 }}
             className="space-y-4 relative"
           >
-            {/* SVG Circuit Overlay */}
-            <svg 
-              className="absolute -inset-x-12 -inset-y-12 w-[calc(100%+6rem)] h-[calc(100%+8rem)] pointer-events-none z-0 overflow-visible" 
-              viewBox="0 0 1150 500" 
-              preserveAspectRatio="none"
-            >
-              <defs>
-                <filter id="glow-wire">
-                  <feGaussianBlur stdDeviation="2.5" result="blur" />
-                  <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                </filter>
-                <filter id="wire-lit-glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="4" result="blur" />
-                  <feColorMatrix type="matrix" values="0 0 0 0 1   0 0 0 0 0.8  0 0 0 0 0  0 0 0 1 0" />
-                  <feMerge>
-                    <feMergeNode />
-                    <feMergeNode in="SourceGraphic" />
-                  </feMerge>
-                </filter>
-              </defs>
-              
-              {/* The Wire Path */}
-              {/* Path: coming out the right of "DANIEL", through the resistor, to the switch, then running leftwards directly to the side of the red text */}
-              {/* The wire will now stay black and will not glow when the switch is flipped */}
-              <g className="transition-all duration-300" stroke="#080808" filter="url(#glow-wire)">
-                {/* Out of DANIEL (Right Side) */}
-                <path 
-                  d="M 1045,160 L 1350,160 " 
-                  fill="none" strokeWidth="6" strokeLinecap="round" 
-                />
-                
-                {/* IEEE Resistor */}
-                <path 
-                  d="M 1350,160 L 1350,185 L 1335,195 L 1365,205 L 1335,215 L 1365,225 L 1335,235 L 1365,245 L 1350,255 L 1350,285" 
-                  fill="none" strokeWidth="6" strokeLinejoin="round" 
-                />
-                
-                <path 
-                  d="M 1350,285 L 1250,285" 
-                  fill="none" strokeWidth="6" strokeLinecap="round" 
-                />
-                
-                {/* IEEE Switch Terminals */}
-                <circle cx="1200" cy="285" r="5" fill="none" strokeWidth="4" />
-                <circle cx="1250" cy="285" r="5" fill="none" strokeWidth="4" />
-                
-                {/* Switch Toggle Arm */}
-                <path 
-                  d={isCircuitOn ? "M 1200,285 L 1250,285" : "M 1200,285 L 1235,255"}
-                  fill="none" strokeWidth="6" strokeLinecap="round" 
-                  className="pointer-events-none"
-                />
+            {/* SVG Circuit Overlay — Desktop */}
+            {!isMobile && (
+              <svg 
+                className="absolute -inset-x-12 -inset-y-12 w-[calc(100%+6rem)] h-[calc(100%+8rem)] pointer-events-none z-0 overflow-visible" 
+                viewBox="0 0 1150 500" 
+                preserveAspectRatio="none"
+              >
+                <defs>
+                  <filter id="glow-wire">
+                    <feGaussianBlur stdDeviation="2.5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <g className="transition-all duration-300" stroke="#080808" filter="url(#glow-wire)">
+                  {/* Out of DANIEL (Right Side) → right → resistor → left → switch */}
+                  <path d="M 1045,160 L 1350,160" fill="none" strokeWidth="6" strokeLinecap="round" />
+                  {/* IEEE Resistor */}
+                  <path d="M 1350,160 L 1350,185 L 1335,195 L 1365,205 L 1335,215 L 1365,225 L 1335,235 L 1365,245 L 1350,255 L 1350,285" fill="none" strokeWidth="6" strokeLinejoin="round" />
+                  <path d="M 1350,285 L 1250,285" fill="none" strokeWidth="6" strokeLinecap="round" />
+                  {/* Switch */}
+                  <circle cx="1200" cy="285" r="5" fill="none" strokeWidth="4" />
+                  <circle cx="1250" cy="285" r="5" fill="none" strokeWidth="4" />
+                  <path d={isCircuitOn ? "M 1200,285 L 1250,285" : "M 1200,285 L 1235,255"} fill="none" strokeWidth="6" strokeLinecap="round" className="pointer-events-none" />
+                  <rect x="1170" y="250" width="110" height="60" fill="transparent" stroke="none" className="pointer-events-auto cursor-pointer" onClick={() => setIsCircuitOn(!isCircuitOn)} />
+                  {/* Switch → right end of red sentence */}
+                  <path d="M 1200,285 L 1030,285" fill="none" strokeWidth="6" strokeLinecap="round" />
+                  {/* Left end of red sentence → up → left side of DANIEL */}
+                  <path d="M 50,285 L 30,285 L 30,203 L 500,203 L 500,107" fill="none" strokeWidth="6" strokeLinecap="round" />
+                </g>
+              </svg>
+            )}
 
-                {/* Invisible Hitbox for Switch */}
-                <rect 
-                  x="1170" y="250" 
-                  width="110" height="60" 
-                  fill="transparent" 
-                  stroke="none"
-                  className="pointer-events-auto cursor-pointer"
-                  onClick={() => setIsCircuitOn(!isCircuitOn)}
-                />
-                
-                {/* Wire coming FROM the switch, plugging into the RIGHT side of the sentence */}
-                <path 
-                  d="M 1200,285 L 1030,285"  
-                  fill="none" strokeWidth="6" strokeLinecap="round" 
-                />
+            {/* SVG Circuit Overlay — Mobile
+                Layout (vertical loop):
+                  SHINE
+                  |wire down left|  DANIEL  |wire down right|
+                      [switch]          [resistor]
+                  |______ ASPIRING VLSI & EMBEDDED... ______|
+            */}
+            {isMobile && (
+              <svg
+                className="absolute inset-0 w-full pointer-events-none z-0 overflow-visible"
+                viewBox="0 0 340 260"
+                preserveAspectRatio="xMidYMid meet"
+                style={{ height: '260px', top: '0', left: '0' }}
+              >
+                <defs>
+                  <filter id="glow-wire-m">
+                    <feGaussianBlur stdDeviation="1.5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <g stroke="#080808" strokeLinecap="round" fill="none" filter="url(#glow-wire-m)">
+                  {/* Left wire: down from left-end of DANIEL → to left of sentence */}
+                  <path d="M 20,60 L 20,140" strokeWidth="4" />
+                  {/* Right wire: down from right-end of DANIEL → to right of sentence */}
+                  <path d="M 320,60 L 320,140" strokeWidth="4" />
 
-                {/* Wire starting at the LEFT side of the sentence, going up to DANIEL */}
-                <path 
-                  d="M 50,285 L 30,285 L 30,203 L 500,203 L 500,107" 
-                  fill="none" strokeWidth="6" strokeLinecap="round" 
-                />
-              </g>
-            </svg>
+                  {/* Switch — bottom left, between left wire and sentence */}
+                  {/* terminal dots */}
+                  <circle cx="20" cy="152" r="4" strokeWidth="3" />
+                  <circle cx="20" cy="168" r="4" strokeWidth="3" />
+                  {/* switch arm */}
+                  <path
+                    d={isCircuitOn ? "M 20,152 L 20,168" : "M 20,152 L 36,164"}
+                    strokeWidth="4"
+                    className="pointer-events-none"
+                  />
+                  {/* hitbox */}
+                  <rect x="6" y="144" width="50" height="36" fill="transparent" stroke="none" className="pointer-events-auto cursor-pointer" onClick={() => setIsCircuitOn(!isCircuitOn)} />
+                  {/* wire from switch down to sentence level */}
+                  <path d="M 20,176 L 20,200" strokeWidth="4" />
 
-            <h1 className="font-sans text-7xl md:text-9xl font-black text-slate-900 leading-none tracking-tighter uppercase relative z-10 flex items-baseline whitespace-nowrap">
+                  {/* Resistor — bottom right, between right wire and sentence */}
+                  <path d="M 320,140 L 320,148 L 311,153 L 329,158 L 311,163 L 329,168 L 311,173 L 329,178 L 320,183 L 320,200" strokeWidth="4" strokeLinejoin="round" />
+
+                  {/* Bottom wire: left sentence end ← → right sentence end */}
+                  <path d="M 20,200 L 320,200" strokeWidth="4" />
+                </g>
+              </svg>
+            )}
+
+            <h1 className={`font-sans font-black text-slate-900 leading-none tracking-tighter uppercase relative z-10 ${isMobile ? 'flex flex-col items-start text-6xl' : 'flex items-baseline whitespace-nowrap text-7xl md:text-9xl'}`}>
               <span className="relative inline-block shrink-0">
                 <span className="relative z-10">
                   SHINE
@@ -322,7 +343,7 @@ const LegoSection = () => {
                 </span>
               </span>
               <span 
-                className={`ml-6 md:ml-12 text-9xl md:text-[15rem] normal-case font-cursive transition-all duration-300 tracking-[0.05em] -translate-y-1 ${isCircuitOn ? 'text-[#fbbf24] drop-shadow-[0_0_20px_#fddb3c]' : 'text-[#4a3f12]'}`}
+                className={`${isMobile ? 'text-[6rem] mt-1 ml-0' : 'ml-6 md:ml-12 text-9xl md:text-[15rem]'} normal-case font-cursive transition-all duration-300 tracking-[0.05em] translate-y-2 ${isCircuitOn ? 'text-[#fbbf24] drop-shadow-[0_0_20px_#fddb3c]' : 'text-[#4a3f12]'}`}
                 style={{ 
                   textShadow: isCircuitOn 
                     ? '0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fddb3c, 0 0 42px #fddb3c, 0 0 82px #fddb3c, 0 0 92px #fddb3c, 0 0 102px #fddb3c' 
@@ -332,7 +353,7 @@ const LegoSection = () => {
                 DANIEL
               </span>
             </h1>
-            <p className=" -translate-y-22 text-3xl md:text-4xl font-bold text-[#e53935] uppercase font-sans tracking-tight relative z-10 whitespace-nowrap">
+            <p className={`font-bold text-[#e53935] uppercase font-sans tracking-tight relative z-10 ${isMobile ? 'text-lg mt-2 whitespace-normal leading-tight' : '-translate-y-22 text-3xl md:text-4xl whitespace-nowrap'}`}>
               Aspiring VLSI & Embedded Systems Engineer
             </p>
           </motion.div>
