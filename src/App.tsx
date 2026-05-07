@@ -274,7 +274,7 @@ const LegoSection = () => {
                   {/* Switch → right end of red sentence / battery cap */}
                   <path d="M 1200,285 L 1000,285" fill="none" strokeWidth="6" strokeLinecap="round" />
                   {/* Left end of battery → up → left side of DANIEL */}
-                  <path d="M 38,285 L 18,285 L 18,203 L 500,203 L 500,107" fill="none" strokeWidth="6" strokeLinecap="round" />
+                  <path d="M 58,285 L 18,285 L 18,203 L 500,203 L 500,107" fill="none" strokeWidth="6" strokeLinecap="round" />
                 </g>
               </svg>
             )}
@@ -402,9 +402,9 @@ const LegoSection = () => {
 
               {/* MAIN BODY: border-2 = border thickness, px-8 = width padding, py-5 = height padding */}
               {/* bg-white/20 = transparency (20=very transparent, 60=more visible) */}
-              <div className={`flex items-center border-2 border-slate-900/70 bg-white/20 backdrop-blur-sm ${isMobile ? 'px-4 py-3' : 'px-8 py-5'}`}>
+              <div className={`flex items-center border-3 border-slate-900/70 bg-white/40 backdrop-blur-sm ${isMobile ? 'px-4 py-3' : 'px-2 py-4'}`}>
                 <p className={`font-bold text-[#e53935] uppercase font-sans tracking-tight ${isMobile ? 'text-base whitespace-normal leading-tight' : 'text-3xl md:text-4xl whitespace-nowrap'}`}>
-                  Aspiring VLSI &amp; Embedded Systems Engineer
+                Aspiring VLSI &amp; Embedded Systems Engineer
                 </p>
               </div>
 
