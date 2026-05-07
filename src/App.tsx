@@ -271,10 +271,10 @@ const LegoSection = () => {
                   <circle cx="1250" cy="285" r="5" fill="none" strokeWidth="4" />
                   <path d={isCircuitOn ? "M 1200,285 L 1250,285" : "M 1200,285 L 1235,255"} fill="none" strokeWidth="6" strokeLinecap="round" className="pointer-events-none" />
                   <rect x="1170" y="250" width="110" height="60" fill="transparent" stroke="none" className="pointer-events-auto cursor-pointer" onClick={() => setIsCircuitOn(!isCircuitOn)} />
-                  {/* Switch → right end of red sentence */}
-                  <path d="M 1200,285 L 1030,285" fill="none" strokeWidth="6" strokeLinecap="round" />
-                  {/* Left end of red sentence → up → left side of DANIEL */}
-                  <path d="M 50,285 L 30,285 L 30,203 L 500,203 L 500,107" fill="none" strokeWidth="6" strokeLinecap="round" />
+                  {/* Switch → right end of red sentence / battery cap */}
+                  <path d="M 1200,285 L 1040,285" fill="none" strokeWidth="6" strokeLinecap="round" />
+                  {/* Left end of battery → up → left side of DANIEL */}
+                  <path d="M 18,285 L 18,203 L 500,203 L 500,107" fill="none" strokeWidth="6" strokeLinecap="round" />
                 </g>
               </svg>
             )}
@@ -398,14 +398,17 @@ const LegoSection = () => {
             </h1>
             {/* Battery shape wrapping the red sentence */}
             <div className={`relative z-10 flex items-center ${isMobile ? 'mt-2' : '-translate-y-22'}`}>
-              {/* Main battery body */}
-              <div className={`bg-white/20 backdrop-blur-sm flex items-center ${isMobile ? 'px-4 py-3' : 'px-8 py-5'}`}>
-                <p className={`font-bold text-[#e53935] uppercase font-sans tracking-tight ${isMobile ? 'text-base whitespace-normal leading-tight' : 'text-3xl md:text-4xl whitespace-nowrap'}`}>
-                  Aspiring VLSI &amp; Embedded Systems Engineer
-                </p>
+              {/* Outer border wrapper around body + cap together */}
+              <div className="flex items-center border-2 border-slate-900/60">
+                {/* Main battery body */}
+                <div className={`bg-white/20 backdrop-blur-sm flex items-center ${isMobile ? 'px-4 py-3' : 'px-8 py-5'}`}>
+                  <p className={`font-bold text-[#e53935] uppercase font-sans tracking-tight ${isMobile ? 'text-base whitespace-normal leading-tight' : 'text-3xl md:text-4xl whitespace-nowrap'}`}>
+                    Aspiring VLSI &amp; Embedded Systems Engineer
+                  </p>
+                </div>
+                {/* Battery cap — positive terminal nub, indented top+bottom to create the stepped look */}
+                <div className={`bg-white/20 backdrop-blur-sm self-center border-2 border-slate-900/60 -mr-[2px] ${isMobile ? 'w-3 h-7' : 'w-4 h-12'}`} />
               </div>
-              {/* Battery cap — positive terminal nub flush on the right */}
-              <div className={`bg-white/20 backdrop-blur-sm self-center ${isMobile ? 'w-3 h-7' : 'w-4 h-12'}`} />
             </div>
           </motion.div>
 
