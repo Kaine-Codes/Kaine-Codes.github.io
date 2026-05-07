@@ -272,7 +272,7 @@ const LegoSection = () => {
                   <path d={isCircuitOn ? "M 1200,280 L 1250,280" : "M 1200,280 L 1235,255"} fill="none" strokeWidth="6" strokeLinecap="round" className="pointer-events-none" />
                   <rect x="1170" y="250" width="110" height="60" fill="transparent" stroke="none" className="pointer-events-auto cursor-pointer" onClick={() => setIsCircuitOn(!isCircuitOn)} />
                   {/* Switch → right end of red sentence / battery cap */}
-                  <path d="M 1200,280 L 1080,280" fill="none" strokeWidth="6" strokeLinecap="round" />
+                  <path d="M 1200,280 L 1060,280" fill="none" strokeWidth="6" strokeLinecap="round" />
                   {/* Left end of battery → up → left side of DANIEL */}
                   <path d="M 53,280 L 18,280 L 18,203 L 500,203 L 500,102" fill="none" strokeWidth="6" strokeLinecap="round" />
                 </g>
@@ -411,7 +411,7 @@ const LegoSection = () => {
               {/* CAP NUB: sits OUTSIDE the body border so it protrudes visually */}
               {/* w-4 = nub width, h-10 = nub height (shorter than body = protrudes inward on top+bottom) */}
               {/* Change w-4→w-6 for wider nub, h-10→h-8 for more protrusion effect */}
-              <div className={`border-2 border-slate-900/70 bg-white/20 backdrop-blur-sm self-center ${isMobile ? 'w-3 h-6' : 'w-4 h-10'}`} />
+              <div className={`border-3 border-slate-900/70 bg-white/20 backdrop-blur-sm self-center ${isMobile ? 'w-3 h-6' : 'w-4 h-10'}`} />
 
             </div>
           </motion.div>
