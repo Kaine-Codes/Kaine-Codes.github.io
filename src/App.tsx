@@ -272,9 +272,9 @@ const LegoSection = () => {
                   <path d={isCircuitOn ? "M 1200,285 L 1250,285" : "M 1200,285 L 1235,255"} fill="none" strokeWidth="6" strokeLinecap="round" className="pointer-events-none" />
                   <rect x="1170" y="250" width="110" height="60" fill="transparent" stroke="none" className="pointer-events-auto cursor-pointer" onClick={() => setIsCircuitOn(!isCircuitOn)} />
                   {/* Switch → right end of red sentence / battery cap */}
-                  <path d="M 1200,285 L 1040,285" fill="none" strokeWidth="6" strokeLinecap="round" />
+                  <path d="M 1200,285 L 1000,285" fill="none" strokeWidth="6" strokeLinecap="round" />
                   {/* Left end of battery → up → left side of DANIEL */}
-                  <path d="M 18,285 L 18,203 L 500,203 L 500,107" fill="none" strokeWidth="6" strokeLinecap="round" />
+                  <path d="M 38,285 L 18,285 L 18,203 L 500,203 L 500,107" fill="none" strokeWidth="6" strokeLinecap="round" />
                 </g>
               </svg>
             )}
