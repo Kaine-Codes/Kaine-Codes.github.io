@@ -227,7 +227,7 @@ const LegoSection = () => {
       </div>
 
       {/* Darkness Gradient Overlay */}
-      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-[#3E2B1E] pointer-events-none z-10" />
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-[#4a3424] pointer-events-none z-10" />
 
       <div className="max-w-8xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-12 gap-12 items-center relative z-20">
         <div className="md:col-span-12 lg:col-span-8 space-y-12">
@@ -397,18 +397,22 @@ const LegoSection = () => {
               </span>
             </h1>
             {/* Battery shape wrapping the red sentence */}
+            {/* POSITIONING WRAPPER: change -translate-y-22 to move up/down, add ml-N to shift right */}
             <div className={`relative z-10 flex items-center ${isMobile ? 'mt-2' : '-translate-y-22'}`}>
-              {/* Outer border wrapper around body + cap together */}
-              <div className="flex items-center border-2 border-slate-900/60">
-                {/* Main battery body */}
-                <div className={`bg-white/20 backdrop-blur-sm flex items-center ${isMobile ? 'px-4 py-3' : 'px-8 py-5'}`}>
-                  <p className={`font-bold text-[#e53935] uppercase font-sans tracking-tight ${isMobile ? 'text-base whitespace-normal leading-tight' : 'text-3xl md:text-4xl whitespace-nowrap'}`}>
-                    Aspiring VLSI &amp; Embedded Systems Engineer
-                  </p>
-                </div>
-                {/* Battery cap — positive terminal nub, indented top+bottom to create the stepped look */}
-                <div className={`bg-white/20 backdrop-blur-sm self-center border-2 border-slate-900/60 -mr-[2px] ${isMobile ? 'w-3 h-7' : 'w-4 h-12'}`} />
+
+              {/* MAIN BODY: border-2 = border thickness, px-8 = width padding, py-5 = height padding */}
+              {/* bg-white/20 = transparency (20=very transparent, 60=more visible) */}
+              <div className={`flex items-center border-2 border-slate-900/70 bg-white/20 backdrop-blur-sm ${isMobile ? 'px-4 py-3' : 'px-8 py-5'}`}>
+                <p className={`font-bold text-[#e53935] uppercase font-sans tracking-tight ${isMobile ? 'text-base whitespace-normal leading-tight' : 'text-3xl md:text-4xl whitespace-nowrap'}`}>
+                  Aspiring VLSI &amp; Embedded Systems Engineer
+                </p>
               </div>
+
+              {/* CAP NUB: sits OUTSIDE the body border so it protrudes visually */}
+              {/* w-4 = nub width, h-10 = nub height (shorter than body = protrudes inward on top+bottom) */}
+              {/* Change w-4→w-6 for wider nub, h-10→h-8 for more protrusion effect */}
+              <div className={`border-2 border-slate-900/70 bg-white/20 backdrop-blur-sm self-center ${isMobile ? 'w-3 h-6' : 'w-4 h-10'}`} />
+
             </div>
           </motion.div>
 
