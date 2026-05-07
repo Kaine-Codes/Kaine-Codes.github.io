@@ -227,7 +227,7 @@ const LegoSection = () => {
       </div>
 
       {/* Darkness Gradient Overlay */}
-      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-[#4a3424] pointer-events-none z-10" />
+      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-[#3E2B1E] pointer-events-none z-10" />
 
       <div className="max-w-8xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-12 gap-12 items-center relative z-20">
         <div className="md:col-span-12 lg:col-span-8 space-y-12">
@@ -250,7 +250,7 @@ const LegoSection = () => {
             {/* SVG Circuit Overlay — Desktop */}
             {!isMobile && (
               <svg 
-                className="absolute -inset-x-12 -inset-y-12 w-[calc(100%+6rem)] h-[calc(100%+8rem)] pointer-events-none z-0 overflow-visible" 
+                className="absolute -inset-x-12 -inset-y-12 w-[calc(100%+6rem)] h-[calc(100%+8rem)] pointer-events-none z-20 overflow-visible" 
                 viewBox="0 0 1150 500" 
                 preserveAspectRatio="none"
               >
