@@ -204,15 +204,27 @@ const LegoSection = () => {
     setMCoords({ svgW, svgH, danielLeft, danielRight, danielBottom, batteryTop, batteryLeft, batteryRight, batteryMidY });
   }, [isMobile]);
 
-  // Re-measure after fonts load + on resize
+  // Re-measure after fonts load + on resize + ResizeObserver on wrapper
   useEffect(() => {
     if (!isMobile) return;
-    // Small delay to let fonts/layout settle
     const t = setTimeout(measureCircuit, 150);
+    const t2 = setTimeout(measureCircuit, 600); // second pass after fonts fully settle
     window.addEventListener('resize', measureCircuit);
-    // Also measure when fonts finish loading
     document.fonts?.ready.then(measureCircuit);
-    return () => { clearTimeout(t); window.removeEventListener('resize', measureCircuit); };
+
+    // Also watch wrapper for size changes (e.g. font swap reflow)
+    let ro: ResizeObserver | null = null;
+    if (circuitWrapperRef.current && typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(measureCircuit);
+      ro.observe(circuitWrapperRef.current);
+    }
+
+    return () => {
+      clearTimeout(t);
+      clearTimeout(t2);
+      window.removeEventListener('resize', measureCircuit);
+      ro?.disconnect();
+    };
   }, [isMobile, measureCircuit]);
 
   // Brick colors computed ONCE on mount — never re-randomised on re-render
@@ -345,22 +357,28 @@ const LegoSection = () => {
             {isMobile && mCoords && (() => {
               const { svgW, svgH, danielLeft, danielRight, danielBottom,
                       batteryTop, batteryLeft, batteryRight, batteryMidY } = mCoords;
-              // Wire column x positions — hug the battery edges so wires align perfectly
-              const LX = Math.max(6, batteryLeft - 2);   // left wire x
-              const RX = Math.min(svgW - 6, batteryRight + 2); // right wire x
 
-              // DANIEL bottom → gap midpoint → battery top midpoint
-              const gapMid    = danielBottom + (batteryTop - danielBottom) * 0.5;
-              // Switch zone: left side, in the gap between DANIEL bottom and battery top
-              const sw1Y      = danielBottom + 8;  // top terminal of switch
-              const sw2Y      = gapMid + 4;        // bottom terminal of switch
-              // Resistor zone: right side, same vertical range
-              const resTopY   = danielBottom + 4;
-              const resBotY   = batteryMidY;
-              // Zigzag amplitude
-              const za        = 8;
-              // Bottom wire sits at battery vertical midpoint
-              const botY      = batteryMidY;
+              // Fixed rail positions — left and right vertical wires run at these x coords
+              const LX = 14;           // left rail x (fixed, near left edge)
+              const RX = svgW - 14;    // right rail x (fixed, near right edge)
+
+              // Horizontal wire from DANIEL's right edge → right rail, at DANIEL's bottom
+              const danielExitY = danielBottom - 10; // slightly above very bottom of DANIEL text
+
+              // Switch sits on LEFT rail, in gap between DANIEL and battery
+              const gapH   = batteryTop - danielBottom;
+              const sw1Y   = danielBottom + Math.max(10, gapH * 0.25);
+              const sw2Y   = danielBottom + Math.max(28, gapH * 0.65);
+
+              // Resistor sits on RIGHT rail, same vertical range as switch
+              const resTopY = sw1Y;
+              const resBotY = sw2Y + 8;
+
+              // Bottom rail — horizontal wire connecting both rails at battery midpoint
+              const botY = batteryMidY;
+
+              // Zigzag amplitude for resistor
+              const za = 9;
 
               return (
                 <svg
@@ -376,56 +394,58 @@ const LegoSection = () => {
                   </defs>
                   <g stroke="#080808" strokeLinecap="round" fill="none" filter="url(#glow-wire-m)">
 
-                    {/* Left wire: DANIEL bottom → switch top terminal */}
-                    <path d={`M ${LX},${danielBottom} L ${LX},${sw1Y}`} strokeWidth="4" />
+                    {/* ── TOP: horizontal wire across DANIEL's bottom, left rail → right rail ── */}
+                    <path d={`M ${LX},${danielExitY} L ${RX},${danielExitY}`} strokeWidth="4" />
 
-                    {/* Switch terminals */}
+                    {/* ── LEFT RAIL: top → switch top terminal ── */}
+                    <path d={`M ${LX},${danielExitY} L ${LX},${sw1Y}`} strokeWidth="4" />
+
+                    {/* Switch terminal dots */}
                     <circle cx={LX} cy={sw1Y} r="4" strokeWidth="3" />
                     <circle cx={LX} cy={sw2Y} r="4" strokeWidth="3" />
 
-                    {/* Switch arm */}
+                    {/* Switch arm (open = angled, closed = straight) */}
                     <path
                       d={isCircuitOn
                         ? `M ${LX},${sw1Y} L ${LX},${sw2Y}`
-                        : `M ${LX},${sw1Y} L ${LX + 16},${sw2Y - 4}`}
+                        : `M ${LX},${sw1Y} L ${LX + 18},${sw2Y - 4}`}
                       strokeWidth="4"
                       className="pointer-events-none"
                     />
 
-                    {/* Hitbox for switch toggle */}
+                    {/* Invisible hitbox for switch tap */}
                     <rect
-                      x={LX - 14} y={sw1Y - 8}
-                      width="44" height={sw2Y - sw1Y + 16}
+                      x={LX - 16} y={sw1Y - 10}
+                      width="52" height={sw2Y - sw1Y + 20}
                       fill="transparent" stroke="none"
                       className="pointer-events-auto cursor-pointer"
                       onClick={() => setIsCircuitOn(!isCircuitOn)}
                     />
 
-                    {/* Wire from switch bottom terminal → battery left midpoint */}
+                    {/* LEFT RAIL: switch bottom → battery left edge */}
                     <path d={`M ${LX},${sw2Y} L ${LX},${botY} L ${batteryLeft},${botY}`} strokeWidth="4" />
 
-                    {/* Right wire: DANIEL bottom → resistor top */}
-                    <path d={`M ${RX},${danielBottom} L ${RX},${resTopY}`} strokeWidth="4" />
+                    {/* ── RIGHT RAIL: top → resistor top ── */}
+                    <path d={`M ${RX},${danielExitY} L ${RX},${resTopY}`} strokeWidth="4" />
 
-                    {/* IEEE zigzag resistor */}
+                    {/* IEEE zigzag resistor on right rail */}
                     <path
                       d={[
                         `M ${RX},${resTopY}`,
-                        `L ${RX},${resTopY + (resBotY - resTopY) * 0.15}`,
+                        `L ${RX},${resTopY + (resBotY - resTopY) * 0.12}`,
                         `L ${RX - za},${resTopY + (resBotY - resTopY) * 0.25}`,
-                        `L ${RX + za},${resTopY + (resBotY - resTopY) * 0.35}`,
-                        `L ${RX - za},${resTopY + (resBotY - resTopY) * 0.45}`,
-                        `L ${RX + za},${resTopY + (resBotY - resTopY) * 0.55}`,
-                        `L ${RX - za},${resTopY + (resBotY - resTopY) * 0.65}`,
-                        `L ${RX + za},${resTopY + (resBotY - resTopY) * 0.75}`,
-                        `L ${RX},${resTopY + (resBotY - resTopY) * 0.85}`,
+                        `L ${RX + za},${resTopY + (resBotY - resTopY) * 0.37}`,
+                        `L ${RX - za},${resTopY + (resBotY - resTopY) * 0.50}`,
+                        `L ${RX + za},${resTopY + (resBotY - resTopY) * 0.63}`,
+                        `L ${RX - za},${resTopY + (resBotY - resTopY) * 0.75}`,
+                        `L ${RX + za},${resTopY + (resBotY - resTopY) * 0.87}`,
                         `L ${RX},${resBotY}`,
                       ].join(' ')}
                       strokeWidth="4"
                       strokeLinejoin="round"
                     />
 
-                    {/* Wire from resistor bottom → battery right midpoint */}
+                    {/* RIGHT RAIL: resistor bottom → battery right edge */}
                     <path d={`M ${RX},${resBotY} L ${RX},${botY} L ${batteryRight},${botY}`} strokeWidth="4" />
 
                   </g>
