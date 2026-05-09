@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Terminal, Github, Linkedin, ExternalLink, Cpu, Code2, Rocket, DraftingCompass, Database, Layers, Radio, CircuitBoard, Mail, Phone, MapPin, Zap, Monitor } from 'lucide-react';
 
@@ -147,9 +147,23 @@ const TerminalScreen = ({ onComplete }: { onComplete: () => void; key?: string }
 
 // --- Portfolio Sections ---
 
+// Mobile circuit coords derived from real DOM measurements
+type MobileCoords = {
+  svgW: number; svgH: number;
+  danielLeft: number; danielRight: number; danielBottom: number;
+  batteryTop: number; batteryLeft: number; batteryRight: number; batteryMidY: number;
+} | null;
+
 const LegoSection = () => {
   const [isCircuitOn, setIsCircuitOn] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [mCoords, setMCoords] = useState<MobileCoords>(null);
+
+  // Refs for DOM measurement
+  const circuitWrapperRef = useRef<HTMLDivElement>(null);
+  const danielRef         = useRef<HTMLSpanElement>(null);
+  const batteryRef        = useRef<HTMLDivElement>(null);
+
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -160,6 +174,46 @@ const LegoSection = () => {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  // Measure real DOM positions and compute SVG coords
+  const measureCircuit = useCallback(() => {
+    if (!isMobile) return;
+    const wrapper  = circuitWrapperRef.current;
+    const daniel   = danielRef.current;
+    const battery  = batteryRef.current;
+    if (!wrapper || !daniel || !battery) return;
+
+    const wRect = wrapper.getBoundingClientRect();
+    const dRect = daniel.getBoundingClientRect();
+    const bRect = battery.getBoundingClientRect();
+
+    // SVG will be sized to the wrapper — use its pixel dimensions as the coordinate space
+    const svgW = wRect.width;
+    const svgH = bRect.bottom - wRect.top + 20; // 20px padding below battery
+
+    // All coords relative to wrapper's top-left
+    const danielLeft   = dRect.left   - wRect.left;
+    const danielRight  = dRect.right  - wRect.left;
+    const danielBottom = dRect.bottom - wRect.top;
+
+    const batteryTop   = bRect.top    - wRect.top;
+    const batteryLeft  = bRect.left   - wRect.left;
+    const batteryRight = bRect.right  - wRect.left;
+    const batteryMidY  = bRect.top + bRect.height / 2 - wRect.top;
+
+    setMCoords({ svgW, svgH, danielLeft, danielRight, danielBottom, batteryTop, batteryLeft, batteryRight, batteryMidY });
+  }, [isMobile]);
+
+  // Re-measure after fonts load + on resize
+  useEffect(() => {
+    if (!isMobile) return;
+    // Small delay to let fonts/layout settle
+    const t = setTimeout(measureCircuit, 150);
+    window.addEventListener('resize', measureCircuit);
+    // Also measure when fonts finish loading
+    document.fonts?.ready.then(measureCircuit);
+    return () => { clearTimeout(t); window.removeEventListener('resize', measureCircuit); };
+  }, [isMobile, measureCircuit]);
 
   // Brick colors computed ONCE on mount — never re-randomised on re-render
   const brickColors = useMemo(() => {
@@ -241,11 +295,13 @@ const LegoSection = () => {
           </motion.div>
           
           <motion.div
+            ref={circuitWrapperRef}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false }}
             transition={{ delay: 0.1 }}
             className="space-y-4 relative"
+            onAnimationComplete={measureCircuit}
           >
             {/* SVG Circuit Overlay — Desktop */}
             {!isMobile && (
@@ -279,55 +335,103 @@ const LegoSection = () => {
               </svg>
             )}
 
-            {/* SVG Circuit Overlay — Mobile
-                Layout (vertical loop):
+            {/* SVG Circuit Overlay — Mobile (ref-measured, dynamically positioned)
+                Layout:
                   SHINE
-                  |wire down left|  DANIEL  |wire down right|
-                      [switch]          [resistor]
-                  |______ ASPIRING VLSI & EMBEDDED... ______|
+                  |wire ↓ left|  DANIEL  |wire ↓ right|
+                  [switch]              [resistor]
+                  |_______ ASPIRING VLSI... ________|
             */}
-            {isMobile && (
-              <svg
-                className="absolute inset-0 w-full pointer-events-none z-0 overflow-visible"
-                viewBox="0 0 340 260"
-                preserveAspectRatio="xMidYMid meet"
-                style={{ height: '260px', top: '0', left: '0' }}
-              >
-                <defs>
-                  <filter id="glow-wire-m">
-                    <feGaussianBlur stdDeviation="1.5" result="blur" />
-                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                  </filter>
-                </defs>
-                <g stroke="#080808" strokeLinecap="round" fill="none" filter="url(#glow-wire-m)">
-                  {/* Left wire: down from left-end of DANIEL → to left of sentence */}
-                  <path d="M 20,60 L 20,140" strokeWidth="4" />
-                  {/* Right wire: down from right-end of DANIEL → to right of sentence */}
-                  <path d="M 320,60 L 320,140" strokeWidth="4" />
+            {isMobile && mCoords && (() => {
+              const { svgW, svgH, danielLeft, danielRight, danielBottom,
+                      batteryTop, batteryLeft, batteryRight, batteryMidY } = mCoords;
+              // Wire column x positions — hug the battery edges so wires align perfectly
+              const LX = Math.max(6, batteryLeft - 2);   // left wire x
+              const RX = Math.min(svgW - 6, batteryRight + 2); // right wire x
 
-                  {/* Switch — bottom left, between left wire and sentence */}
-                  {/* terminal dots */}
-                  <circle cx="20" cy="152" r="4" strokeWidth="3" />
-                  <circle cx="20" cy="168" r="4" strokeWidth="3" />
-                  {/* switch arm */}
-                  <path
-                    d={isCircuitOn ? "M 20,152 L 20,168" : "M 20,152 L 36,164"}
-                    strokeWidth="4"
-                    className="pointer-events-none"
-                  />
-                  {/* hitbox */}
-                  <rect x="6" y="144" width="50" height="36" fill="transparent" stroke="none" className="pointer-events-auto cursor-pointer" onClick={() => setIsCircuitOn(!isCircuitOn)} />
-                  {/* wire from switch down to sentence level */}
-                  <path d="M 20,176 L 20,200" strokeWidth="4" />
+              // DANIEL bottom → gap midpoint → battery top midpoint
+              const gapMid    = danielBottom + (batteryTop - danielBottom) * 0.5;
+              // Switch zone: left side, in the gap between DANIEL bottom and battery top
+              const sw1Y      = danielBottom + 8;  // top terminal of switch
+              const sw2Y      = gapMid + 4;        // bottom terminal of switch
+              // Resistor zone: right side, same vertical range
+              const resTopY   = danielBottom + 4;
+              const resBotY   = batteryMidY;
+              // Zigzag amplitude
+              const za        = 8;
+              // Bottom wire sits at battery vertical midpoint
+              const botY      = batteryMidY;
 
-                  {/* Resistor — bottom right, between right wire and sentence */}
-                  <path d="M 320,140 L 320,148 L 311,153 L 329,158 L 311,163 L 329,168 L 311,173 L 329,178 L 320,183 L 320,200" strokeWidth="4" strokeLinejoin="round" />
+              return (
+                <svg
+                  className="absolute top-0 left-0 pointer-events-none z-20 overflow-visible"
+                  style={{ width: svgW, height: svgH }}
+                  viewBox={`0 0 ${svgW} ${svgH}`}
+                >
+                  <defs>
+                    <filter id="glow-wire-m">
+                      <feGaussianBlur stdDeviation="1.5" result="blur" />
+                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                  </defs>
+                  <g stroke="#080808" strokeLinecap="round" fill="none" filter="url(#glow-wire-m)">
 
-                  {/* Bottom wire: left sentence end ← → right sentence end */}
-                  <path d="M 20,200 L 320,200" strokeWidth="4" />
-                </g>
-              </svg>
-            )}
+                    {/* Left wire: DANIEL bottom → switch top terminal */}
+                    <path d={`M ${LX},${danielBottom} L ${LX},${sw1Y}`} strokeWidth="4" />
+
+                    {/* Switch terminals */}
+                    <circle cx={LX} cy={sw1Y} r="4" strokeWidth="3" />
+                    <circle cx={LX} cy={sw2Y} r="4" strokeWidth="3" />
+
+                    {/* Switch arm */}
+                    <path
+                      d={isCircuitOn
+                        ? `M ${LX},${sw1Y} L ${LX},${sw2Y}`
+                        : `M ${LX},${sw1Y} L ${LX + 16},${sw2Y - 4}`}
+                      strokeWidth="4"
+                      className="pointer-events-none"
+                    />
+
+                    {/* Hitbox for switch toggle */}
+                    <rect
+                      x={LX - 14} y={sw1Y - 8}
+                      width="44" height={sw2Y - sw1Y + 16}
+                      fill="transparent" stroke="none"
+                      className="pointer-events-auto cursor-pointer"
+                      onClick={() => setIsCircuitOn(!isCircuitOn)}
+                    />
+
+                    {/* Wire from switch bottom terminal → battery left midpoint */}
+                    <path d={`M ${LX},${sw2Y} L ${LX},${botY} L ${batteryLeft},${botY}`} strokeWidth="4" />
+
+                    {/* Right wire: DANIEL bottom → resistor top */}
+                    <path d={`M ${RX},${danielBottom} L ${RX},${resTopY}`} strokeWidth="4" />
+
+                    {/* IEEE zigzag resistor */}
+                    <path
+                      d={[
+                        `M ${RX},${resTopY}`,
+                        `L ${RX},${resTopY + (resBotY - resTopY) * 0.15}`,
+                        `L ${RX - za},${resTopY + (resBotY - resTopY) * 0.25}`,
+                        `L ${RX + za},${resTopY + (resBotY - resTopY) * 0.35}`,
+                        `L ${RX - za},${resTopY + (resBotY - resTopY) * 0.45}`,
+                        `L ${RX + za},${resTopY + (resBotY - resTopY) * 0.55}`,
+                        `L ${RX - za},${resTopY + (resBotY - resTopY) * 0.65}`,
+                        `L ${RX + za},${resTopY + (resBotY - resTopY) * 0.75}`,
+                        `L ${RX},${resTopY + (resBotY - resTopY) * 0.85}`,
+                        `L ${RX},${resBotY}`,
+                      ].join(' ')}
+                      strokeWidth="4"
+                      strokeLinejoin="round"
+                    />
+
+                    {/* Wire from resistor bottom → battery right midpoint */}
+                    <path d={`M ${RX},${resBotY} L ${RX},${botY} L ${batteryRight},${botY}`} strokeWidth="4" />
+
+                  </g>
+                </svg>
+              );
+            })()}
 
             <h1 className={`font-sans font-black text-slate-900 leading-none tracking-tighter uppercase relative z-10 ${isMobile ? 'flex flex-col items-start text-6xl' : 'flex items-baseline whitespace-nowrap text-7xl md:text-9xl'}`}>
               <span className="relative inline-block shrink-0">
@@ -386,6 +490,7 @@ const LegoSection = () => {
                 </span>
               </span>
               <span 
+                ref={danielRef}
                 className={`${isMobile ? 'text-[6rem] mt-1 ml-0' : 'ml-6 md:ml-12 text-9xl md:text-[15rem]'} normal-case font-cursive transition-all duration-300 tracking-[0.05em] -translate-y-1 ${isCircuitOn ? 'text-[#fbbf24] drop-shadow-[0_0_20px_#fddb3c]' : 'text-[#4a3f12]'}`}
                 style={{ 
                   textShadow: isCircuitOn 
@@ -398,7 +503,7 @@ const LegoSection = () => {
             </h1>
             {/* Battery shape wrapping the red sentence */}
             {/* POSITIONING WRAPPER: change -translate-y-22 to move up/down, add ml-N to shift right */}
-            <div className={`relative z-10 flex items-center ${isMobile ? 'mt-2' : '-translate-y-22'}`}>
+            <div ref={batteryRef} className={`relative z-10 flex items-center ${isMobile ? 'mt-2' : '-translate-y-22'}`}>
 
               {/* MAIN BODY: border-2 = border thickness, px-8 = width padding, py-5 = height padding */}
               {/* bg-white/20 = transparency (20=very transparent, 60=more visible) */}
