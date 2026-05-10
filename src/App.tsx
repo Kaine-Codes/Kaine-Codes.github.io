@@ -147,23 +147,9 @@ const TerminalScreen = ({ onComplete }: { onComplete: () => void; key?: string }
 
 // --- Portfolio Sections ---
 
-// Mobile circuit coords derived from real DOM measurements
-type MobileCoords = {
-  svgW: number; svgH: number;
-  danielLeft: number; danielRight: number; danielBottom: number;
-  batteryTop: number; batteryLeft: number; batteryRight: number; batteryMidY: number;
-} | null;
-
 const LegoSection = () => {
   const [isCircuitOn, setIsCircuitOn] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [mCoords, setMCoords] = useState<MobileCoords>(null);
-
-  // Refs for DOM measurement
-  const circuitWrapperRef = useRef<HTMLDivElement>(null);
-  const danielRef         = useRef<HTMLSpanElement>(null);
-  const batteryRef        = useRef<HTMLDivElement>(null);
-
   const scrollToSection = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -174,58 +160,6 @@ const LegoSection = () => {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
-
-  // Measure real DOM positions and compute SVG coords
-  const measureCircuit = useCallback(() => {
-    if (!isMobile) return;
-    const wrapper  = circuitWrapperRef.current;
-    const daniel   = danielRef.current;
-    const battery  = batteryRef.current;
-    if (!wrapper || !daniel || !battery) return;
-
-    const wRect = wrapper.getBoundingClientRect();
-    const dRect = daniel.getBoundingClientRect();
-    const bRect = battery.getBoundingClientRect();
-
-    // SVG will be sized to the wrapper — use its pixel dimensions as the coordinate space
-    const svgW = wRect.width;
-    const svgH = bRect.bottom - wRect.top + 20; // 20px padding below battery
-
-    // All coords relative to wrapper's top-left
-    const danielLeft   = dRect.left   - wRect.left;
-    const danielRight  = dRect.right  - wRect.left;
-    const danielBottom = dRect.bottom - wRect.top;
-
-    const batteryTop   = bRect.top    - wRect.top;
-    const batteryLeft  = bRect.left   - wRect.left;
-    const batteryRight = bRect.right  - wRect.left;
-    const batteryMidY  = bRect.top + bRect.height / 2 - wRect.top;
-
-    setMCoords({ svgW, svgH, danielLeft, danielRight, danielBottom, batteryTop, batteryLeft, batteryRight, batteryMidY });
-  }, [isMobile]);
-
-  // Re-measure after fonts load + on resize + ResizeObserver on wrapper
-  useEffect(() => {
-    if (!isMobile) return;
-    const t = setTimeout(measureCircuit, 150);
-    const t2 = setTimeout(measureCircuit, 600); // second pass after fonts fully settle
-    window.addEventListener('resize', measureCircuit);
-    document.fonts?.ready.then(measureCircuit);
-
-    // Also watch wrapper for size changes (e.g. font swap reflow)
-    let ro: ResizeObserver | null = null;
-    if (circuitWrapperRef.current && typeof ResizeObserver !== 'undefined') {
-      ro = new ResizeObserver(measureCircuit);
-      ro.observe(circuitWrapperRef.current);
-    }
-
-    return () => {
-      clearTimeout(t);
-      clearTimeout(t2);
-      window.removeEventListener('resize', measureCircuit);
-      ro?.disconnect();
-    };
-  }, [isMobile, measureCircuit]);
 
   // Brick colors computed ONCE on mount — never re-randomised on re-render
   const brickColors = useMemo(() => {
@@ -293,6 +227,8 @@ const LegoSection = () => {
       </div>
 
       {/* Darkness Gradient Overlay */}
+      {/* TIP: To change the background transition color, modify the 'to-[#3E2B1E]' hex code below. */}
+      {/* This color blends the Lego background into the dark Experience section. */}
       <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-b from-transparent to-[#3E2B1E] pointer-events-none z-10" />
 
       <div className="max-w-8xl mx-auto px-6 md:px-12 grid grid-cols-1 md:grid-cols-12 gap-12 items-center relative z-20">
@@ -307,13 +243,11 @@ const LegoSection = () => {
           </motion.div>
           
           <motion.div
-            ref={circuitWrapperRef}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: false }}
             transition={{ delay: 0.1 }}
             className="space-y-4 relative"
-            onAnimationComplete={measureCircuit}
           >
             {/* SVG Circuit Overlay — Desktop */}
             {!isMobile && (
@@ -347,113 +281,57 @@ const LegoSection = () => {
               </svg>
             )}
 
-            {/* SVG Circuit Overlay — Mobile (ref-measured, dynamically positioned)
-                Layout:
+            {/* SVG Circuit Overlay — Mobile
+                Layout (vertical loop):
                   SHINE
-                  |wire ↓ left|  DANIEL  |wire ↓ right|
-                  [switch]              [resistor]
-                  |_______ ASPIRING VLSI... ________|
+                  |wire down left|  DANIEL  |wire down right|
+                      [switch]          [resistor]
+                  |______ ASPIRING VLSI & EMBEDDED... ______|
             */}
-            {isMobile && mCoords && (() => {
-              const { svgW, svgH, danielLeft, danielRight, danielBottom,
-                      batteryTop, batteryLeft, batteryRight, batteryMidY } = mCoords;
+            {isMobile && (
+              <svg
+                className="absolute inset-0 w-full pointer-events-none z-0 overflow-visible"
+                viewBox="0 0 340 260"
+                preserveAspectRatio="xMidYMid meet"
+                style={{ height: '260px', top: '0', left: '0' }}
+              >
+                <defs>
+                  <filter id="glow-wire-m">
+                    <feGaussianBlur stdDeviation="1.5" result="blur" />
+                    <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                  </filter>
+                </defs>
+                <g stroke="#080808" strokeLinecap="round" fill="none" filter="url(#glow-wire-m)">
+                  {/* Left wire: down from left-end of DANIEL → to left of sentence */}
+                  <path d="M 20,60 L 20,140" strokeWidth="4" />
+                  {/* Right wire: down from right-end of DANIEL → to right of sentence */}
+                  <path d="M 320,60 L 320,140" strokeWidth="4" />
 
-              // Fixed rail positions — left and right vertical wires run at these x coords
-              const LX = 14;           // left rail x (fixed, near left edge)
-              const RX = svgW - 14;    // right rail x (fixed, near right edge)
+                  {/* Switch — bottom left, between left wire and sentence */}
+                  {/* terminal dots */}
+                  <circle cx="20" cy="152" r="4" strokeWidth="3" />
+                  <circle cx="20" cy="168" r="4" strokeWidth="3" />
+                  {/* switch arm */}
+                  <path
+                    d={isCircuitOn ? "M 20,152 L 20,168" : "M 20,152 L 36,164"}
+                    strokeWidth="4"
+                    className="pointer-events-none"
+                  />
+                  {/* hitbox */}
+                  <rect x="6" y="144" width="50" height="36" fill="transparent" stroke="none" className="pointer-events-auto cursor-pointer" onClick={() => setIsCircuitOn(!isCircuitOn)} />
+                  {/* wire from switch down to sentence level */}
+                  <path d="M 20,176 L 20,200" strokeWidth="4" />
 
-              // Horizontal wire from DANIEL's right edge → right rail, at DANIEL's bottom
-              const danielExitY = danielBottom - 10; // slightly above very bottom of DANIEL text
+                  {/* Resistor — bottom right, between right wire and sentence */}
+                  <path d="M 320,140 L 320,148 L 311,153 L 329,158 L 311,163 L 329,168 L 311,173 L 329,178 L 320,183 L 320,200" strokeWidth="4" strokeLinejoin="round" />
 
-              // Switch sits on LEFT rail, in gap between DANIEL and battery
-              const gapH   = batteryTop - danielBottom;
-              const sw1Y   = danielBottom + Math.max(10, gapH * 0.25);
-              const sw2Y   = danielBottom + Math.max(28, gapH * 0.65);
+                  {/* Bottom wire: left sentence end ← → right sentence end */}
+                  <path d="M 20,200 L 320,200" strokeWidth="4" />
+                </g>
+              </svg>
+            )}
 
-              // Resistor sits on RIGHT rail, same vertical range as switch
-              const resTopY = sw1Y;
-              const resBotY = sw2Y + 8;
-
-              // Bottom rail — horizontal wire connecting both rails at battery midpoint
-              const botY = batteryMidY;
-
-              // Zigzag amplitude for resistor
-              const za = 9;
-
-              return (
-                <svg
-                  className="absolute top-0 left-0 pointer-events-none z-20 overflow-visible"
-                  style={{ width: svgW, height: svgH }}
-                  viewBox={`0 0 ${svgW} ${svgH}`}
-                >
-                  <defs>
-                    <filter id="glow-wire-m">
-                      <feGaussianBlur stdDeviation="1.5" result="blur" />
-                      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                    </filter>
-                  </defs>
-                  <g stroke="#080808" strokeLinecap="round" fill="none" filter="url(#glow-wire-m)">
-
-                    {/* ── TOP: horizontal wire across DANIEL's bottom, left rail → right rail ── */}
-                    <path d={`M ${LX},${danielExitY} L ${RX},${danielExitY}`} strokeWidth="4" />
-
-                    {/* ── LEFT RAIL: top → switch top terminal ── */}
-                    <path d={`M ${LX},${danielExitY} L ${LX},${sw1Y}`} strokeWidth="4" />
-
-                    {/* Switch terminal dots */}
-                    <circle cx={LX} cy={sw1Y} r="4" strokeWidth="3" />
-                    <circle cx={LX} cy={sw2Y} r="4" strokeWidth="3" />
-
-                    {/* Switch arm (open = angled, closed = straight) */}
-                    <path
-                      d={isCircuitOn
-                        ? `M ${LX},${sw1Y} L ${LX},${sw2Y}`
-                        : `M ${LX},${sw1Y} L ${LX + 18},${sw2Y - 4}`}
-                      strokeWidth="4"
-                      className="pointer-events-none"
-                    />
-
-                    {/* Invisible hitbox for switch tap */}
-                    <rect
-                      x={LX - 16} y={sw1Y - 10}
-                      width="52" height={sw2Y - sw1Y + 20}
-                      fill="transparent" stroke="none"
-                      className="pointer-events-auto cursor-pointer"
-                      onClick={() => setIsCircuitOn(!isCircuitOn)}
-                    />
-
-                    {/* LEFT RAIL: switch bottom → battery left edge */}
-                    <path d={`M ${LX},${sw2Y} L ${LX},${botY} L ${batteryLeft},${botY}`} strokeWidth="4" />
-
-                    {/* ── RIGHT RAIL: top → resistor top ── */}
-                    <path d={`M ${RX},${danielExitY} L ${RX},${resTopY}`} strokeWidth="4" />
-
-                    {/* IEEE zigzag resistor on right rail */}
-                    <path
-                      d={[
-                        `M ${RX},${resTopY}`,
-                        `L ${RX},${resTopY + (resBotY - resTopY) * 0.12}`,
-                        `L ${RX - za},${resTopY + (resBotY - resTopY) * 0.25}`,
-                        `L ${RX + za},${resTopY + (resBotY - resTopY) * 0.37}`,
-                        `L ${RX - za},${resTopY + (resBotY - resTopY) * 0.50}`,
-                        `L ${RX + za},${resTopY + (resBotY - resTopY) * 0.63}`,
-                        `L ${RX - za},${resTopY + (resBotY - resTopY) * 0.75}`,
-                        `L ${RX + za},${resTopY + (resBotY - resTopY) * 0.87}`,
-                        `L ${RX},${resBotY}`,
-                      ].join(' ')}
-                      strokeWidth="4"
-                      strokeLinejoin="round"
-                    />
-
-                    {/* RIGHT RAIL: resistor bottom → battery right edge */}
-                    <path d={`M ${RX},${resBotY} L ${RX},${botY} L ${batteryRight},${botY}`} strokeWidth="4" />
-
-                  </g>
-                </svg>
-              );
-            })()}
-
-            <h1 className={`font-sans font-black text-slate-900 leading-none tracking-tighter uppercase relative z-10 ${isMobile ? 'flex flex-col items-start text-6xl' : 'flex items-baseline whitespace-nowrap text-7xl md:text-9xl'}`}>
+            <h1 className={`font-sans font-black text-slate-900 leading-none tracking-tighter uppercase relative z-10 ${isMobile ? 'flex items-baseline text-5xl sm:text-7xl gap-3' : 'flex items-baseline whitespace-nowrap text-8xl md:text-[10rem] lg:text-[11rem]'}`}>
               <span className="relative inline-block shrink-0">
                 <span className="relative z-10">
                   SHINE
@@ -490,45 +368,28 @@ const LegoSection = () => {
                         </svg>
                       </motion.div>
                     ))}
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent z-10"
-                      initial={{ x: '-100%', opacity: 1 }}
-                      whileInView={{ 
-                        x: ['-100%', '60%'],
-                        opacity: [1, 1, 0]
-                      }}
-                      viewport={{ once: false }}
-                      transition={{ 
-                        duration: 1.2, 
-                        times: [0, 0.6, 1],
-                        repeat: 0, 
-                        repeatDelay: 2, 
-                        ease: "easeInOut" 
-                      }}
-                    />
                   </motion.div>
                 </span>
               </span>
               <span 
-                ref={danielRef}
-                className={`${isMobile ? 'text-[6rem] mt-1 ml-0' : 'ml-6 md:ml-12 text-9xl md:text-[15rem]'} normal-case font-cursive transition-all duration-300 tracking-[0.05em] -translate-y-1 ${isCircuitOn ? 'text-[#fbbf24] drop-shadow-[0_0_20px_#fddb3c]' : 'text-[#4a3f12]'}`}
+                className={`${isMobile ? 'text-[4rem] sm:text-[6rem] -translate-y-1' : 'ml-4 md:ml-8 text-9xl md:text-[11rem] lg:text-[12rem] -translate-y-1'} normal-case font-cursive transition-all duration-300 tracking-[0.05em] ${isCircuitOn ? 'text-[#fbbf24] drop-shadow-[0_0_20px_#fddb3c]' : 'text-[#4a3f12]'}`}
                 style={{ 
                   textShadow: isCircuitOn 
                     ? '0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fddb3c, 0 0 42px #fddb3c, 0 0 82px #fddb3c, 0 0 92px #fddb3c, 0 0 102px #fddb3c' 
                     : 'none'
                 }}
               >
-                DANIEL
+                Daniel
               </span>
             </h1>
             {/* Battery shape wrapping the red sentence */}
             {/* POSITIONING WRAPPER: change -translate-y-22 to move up/down, add ml-N to shift right */}
-            <div ref={batteryRef} className={`relative z-10 flex items-center ${isMobile ? 'mt-2' : '-translate-y-22'}`}>
+            <div className={`relative z-10 flex items-center ${isMobile ? 'mt-4' : '-translate-y-16'}`}>
 
               {/* MAIN BODY: border-2 = border thickness, px-8 = width padding, py-5 = height padding */}
               {/* bg-white/20 = transparency (20=very transparent, 60=more visible) */}
-              <div className={`flex items-center border-3 border-slate-900/70 bg-white/40 backdrop-blur-sm ${isMobile ? 'px-4 py-3' : 'px-2 py-4'}`}>
-                <p className={`font-bold text-[#e53935] uppercase font-sans tracking-tight ${isMobile ? 'text-base whitespace-normal leading-tight' : 'text-3xl md:text-4xl whitespace-nowrap'}`}>
+              <div className={`flex items-center border-4 border-slate-900 bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,0.1)] ${isMobile ? 'px-6 py-4' : 'px-8 py-5'}`}>
+                <p className={`font-bold text-[#e53935] uppercase font-sans tracking-tight ${isMobile ? 'text-lg whitespace-normal leading-tight' : 'text-3xl md:text-4xl lg:text-5xl whitespace-nowrap'}`}>
                 Aspiring VLSI &amp; Embedded Systems Engineer
                 </p>
               </div>
@@ -536,7 +397,7 @@ const LegoSection = () => {
               {/* CAP NUB: sits OUTSIDE the body border so it protrudes visually */}
               {/* w-4 = nub width, h-10 = nub height (shorter than body = protrudes inward on top+bottom) */}
               {/* Change w-4→w-6 for wider nub, h-10→h-8 for more protrusion effect */}
-              <div className={`border-3 border-slate-900/70 bg-white/20 backdrop-blur-sm self-center ${isMobile ? 'w-3 h-6' : 'w-4 h-10'}`} />
+              <div className={`border-4 border-l-0 border-slate-900 bg-white self-center ${isMobile ? 'w-4 h-8' : 'w-6 h-14'}`} />
 
             </div>
           </motion.div>
@@ -590,45 +451,235 @@ const LegoSection = () => {
   );
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// DETAIL MODAL
+// This popup opens when you click any Experience or Project card.
+// It blurs the background and shows an image slider + description.
+//
+// Props it receives:
+//   item.title       → big heading in the modal
+//   item.sub         → subtitle line (org name, tags, etc.)
+//   item.desc        → short summary paragraph
+//   item.details     → ── REPLACE THIS ── longer paragraph with real details
+//   item.images      → ── REPLACE THIS ── array of image URLs for the slider
+//   onClose          → called when the × button or backdrop is clicked
+//   theme            → 'modern' | 'minecraft'
+// ─────────────────────────────────────────────────────────────────────────────
+type ModalItem = {
+  title: string;
+  sub: string;
+  desc: string;
+  details: string;   // longer body text — replace placeholder below
+  images: string[];  // array of image paths/URLs — replace placeholder below
+  img?: string;      // icon for experiences
+  id?: string;       // tracking id for projects
+  tags?: string[];   // descriptive tags for projects
+};
+
+const DetailModal = ({ item, onClose, theme = 'modern' }: { item: ModalItem; onClose: () => void; theme?: 'modern' | 'minecraft' }) => {
+  const [slide, setSlide] = useState(0);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [onClose]);
+
+  const prev = (e: React.MouseEvent) => { e.stopPropagation(); setSlide(s => (s - 1 + item.images.length) % item.images.length); }
+  const next = (e: React.MouseEvent) => { e.stopPropagation(); setSlide(s => (s + 1) % item.images.length); }
+
+  const isMinecraft = theme === 'minecraft';
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        key="backdrop"
+        className="fixed inset-0 z-[200] flex items-center justify-center p-6"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      >
+        <div className="absolute inset-0 bg-black/70 backdrop-blur-md" />
+
+        <motion.div
+          key="panel"
+          className={`relative z-10 w-full max-w-5xl max-h-[85vh] flex flex-col md:flex-row overflow-hidden shadow-2xl transition-all duration-300 ${
+            isMinecraft 
+              ? 'bg-[#3d2b1f] border-x-[12px] border-b-[12px] border-[#2d1f14] font-minecraft' 
+              : 'bg-[#0d0d0d] border border-emerald-500/30 rounded-2xl'
+          }`}
+          initial={{ scale: 0.92, opacity: 0, y: 24 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.92, opacity: 0, y: 24 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 28 }}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Minecraft Top Bar (Grass) */}
+          {isMinecraft && (
+            <div className="absolute top-0 left-0 right-0 h-12 bg-[#5d8a3c] border-b-8 border-[#4d7232] z-20 flex items-center px-4">
+               <div className="flex gap-1">
+                  <div className="w-4 h-4 bg-white/10" />
+                  <div className="w-2 h-2 bg-white/20" />
+               </div>
+            </div>
+          )}
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className={`absolute top-2 right-4 z-30 transition-colors text-3xl font-bold leading-none ${
+              isMinecraft ? 'text-white hover:text-[#ffeb3b] [text-shadow:2px_2px_0px_#000]' : 'text-white/40 hover:text-white'
+            }`}
+            aria-label="Close"
+          >×</button>
+
+          {/* Spacer for Minecraft Header */}
+          {isMinecraft && <div className="md:hidden h-12 w-full shrink-0" />}
+
+          {/* Minecraft Dirt Texture Overlay for Exp section */}
+          {isMinecraft && (
+            <div className="absolute inset-x-0 bottom-0 top-12 opacity-40 pointer-events-none mix-blend-multiply" style={{
+              backgroundImage: `url('https://www.transparenttextures.com/patterns/dark-matter.png')`,
+              backgroundSize: '256px 256px'
+            }} />
+          )}
+
+          {/* ── LEFT COLUMN: Text Content ── */}
+          <div className={`w-full md:w-[55%] shrink-0 p-8 overflow-y-auto flex flex-col justify-center space-y-4 relative z-10 ${
+            isMinecraft ? 'pt-16 border-r-8 border-[#2d1f14]' : 'border-r border-white/5'
+          }`}>
+            <div>
+              <h2 className={`text-2xl font-black uppercase tracking-tight leading-tight ${
+                isMinecraft ? 'text-[#ffeb3b] [text-shadow:3px_3px_0px_rgba(0,0,0,0.5)]' : 'text-white font-sans'
+              }`}>
+                {item.title}
+              </h2>
+              <p className={`text-xs uppercase tracking-widest mt-2 ${
+                isMinecraft ? 'text-white/80 font-minecraft' : 'text-emerald-400 font-mono'
+              }`}>
+                {item.sub}
+              </p>
+            </div>
+            <p className={`text-sm leading-relaxed ${
+              isMinecraft ? 'text-stone-300 font-minecraft' : 'text-white/60 font-sans'
+            }`}>
+              {item.desc}
+            </p>
+            <div className={`text-sm leading-relaxed border-t pt-4 space-y-4 ${
+              isMinecraft ? 'text-stone-400 border-white/10 font-minecraft' : 'text-white/40 border-white/5 font-sans'
+            }`}>
+              {item.details}
+            </div>
+          </div>
+
+          {/* ── RIGHT COLUMN: Image Slider ── */}
+          <div className={`w-full md:w-[45%] shrink-0 flex flex-col items-center justify-center p-4 relative z-10 ${
+            isMinecraft ? 'pt-16 bg-black/20' : 'bg-black/40'
+          }`}>
+            <div className={`relative w-full aspect-[4/3] overflow-hidden bg-black/60 shadow-inner ${
+              isMinecraft ? 'border-4 border-[#2d1f14]' : 'rounded-xl border border-white/5'
+            }`}>
+              {item.images && item.images.length > 0 ? (
+                <motion.img
+                  key={slide}
+                  src={item.images[slide]}
+                  className="w-full h-full object-cover"
+                  initial={{ opacity: 0, scale: 1.05 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.4 }}
+                  onError={e => { (e.target as HTMLImageElement).src = 'https://placehold.co/600x450/111/10b981?text=Image+Coming+Soon'; }}
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-white/20 uppercase text-[10px] tracking-widest font-bold">No Preview Available</div>
+              )}
+              
+              {(item.images?.length || 0) > 1 && (
+                <>
+                  <button onClick={prev} className={`absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center transition-colors cursor-pointer z-10 ${
+                    isMinecraft ? 'bg-[#3d2b1f] border-2 border-[#2d1f14] text-white hover:bg-[#523d2d]' : 'bg-black/50 hover:bg-emerald-500/80 text-white rounded-full'
+                  }`}>‹</button>
+                  <button onClick={next} className={`absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 flex items-center justify-center transition-colors cursor-pointer z-10 ${
+                    isMinecraft ? 'bg-[#3d2b1f] border-2 border-[#2d1f14] text-white hover:bg-[#523d2d]' : 'bg-black/50 hover:bg-emerald-500/80 text-white rounded-full'
+                  }`}>›</button>
+                </>
+              )}
+            </div>
+            
+            <div className="flex gap-2 mt-3">
+              {item.images.map((_, i) => (
+                <button key={i} onClick={(e) => { e.stopPropagation(); setSlide(i); }}
+                  className={`w-2 h-2 transition-colors ${
+                    isMinecraft 
+                      ? (i === slide ? 'bg-[#ffeb3b]' : 'bg-white/10') 
+                      : (i === slide ? 'bg-emerald-400' : 'bg-white/20 rounded-full')
+                  } ${!isMinecraft && 'rounded-full'}`}
+                />
+              ))}
+            </div>
+            <p className={`text-[10px] uppercase tracking-widest mt-2 ${
+              isMinecraft ? 'text-[#ffeb3b]/60' : 'text-white/20'
+            }`}>
+              {slide + 1} / {item.images.length}
+            </p>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
+
 const MinecraftSection = () => {
-  const experiences = [
-    { 
-      title: 'Hardware Internship', 
-      sub: 'Magnum Technology Center, Dubai', 
-      icon: 'Redstone', 
-      img: 'redstone.png',
-      desc: 'Focused on PLC Programming and gaining exposure to industrial safety standards in JAFZA, Dubai (May-June 2025).' 
-    },
-    { 
-      title: 'Vegathon - Organizer', 
-      sub: 'ECE Dept & C-DAC', 
-      icon: 'Piston', 
-      img: 'torch.png',
-      desc: 'Contributed to organizing many national-level hackathon - CarbonX, in collaboration with C-DAC.' 
-    },
-    { 
-      title: 'Media Member', 
-      sub: 'RSET Media Team', 
-      icon: 'Repeater', 
-      img: 'Repeater.png',
-      desc: 'Contributing to recording/capturing collegiate events and coordinating technical media infrastructure for major celebrations.' 
-    },
-    { 
-      title: ' Technical Coord and Organizing', 
-      sub: 'Electronauts', 
-      icon: 'Comparator', 
-      img: 'comparator.png',
-      desc: 'Organized tech-fest events including Blindbuild 2.0, Codequest 2.0, Chips2Silicon, and Wire it right and many other activity hour events.' 
-    },
-    { 
-      title: 'Volunteering', 
-      sub: 'IEDC & GDSC Events', 
-      icon: 'Piston', 
-      img: 'piston.png',
-      desc: 'Contributed to organizing many tech events from normal activity hours to national-level tech fests.' 
-    },
-    
-  ];
+  const [activeExp, setActiveExp] = useState<ModalItem | null>(null);
+
+  const experiences = (
+    [
+      { 
+        title: 'Hardware Internship', 
+        sub: '@Magnum Technology Center, Dubai', 
+        img: 'redstone.png',
+        desc: 'Focused on PLC Programming and gaining exposure to industrial safety standards in JAFZA, Dubai (May-June 2025).',
+        // ── REPLACE details: describe what you did, learned, who you met ──
+        details: 'During this internship I worked with Allen-Bradley PLCs, learned ladder logic programming, and observed live industrial automation lines. I got hands-on exposure to JAFZA safety compliance standards and collaborated with engineers from 3 different countries.',
+        // ── REPLACE images: add real photo paths e.g. ['internship1.jpg', 'internship2.jpg'] ──
+        images: ['https://placehold.co/800x450/0d0d0d/10b981?text=Internship+Photo+1', 'https://placehold.co/800x450/0d0d0d/10b981?text=Internship+Photo+2'],
+      },
+      { 
+        title: 'Vegathon — Organizer', 
+        sub: '@ECE Dept & C-DAC', 
+        img: 'torch.png',
+        desc: 'Contributed to organizing many national-level hackathon - CarbonX, in collaboration with C-DAC.',
+        details: 'Led logistics for the CarbonX national hackathon, coordinating with 200+ participants, managing event timelines, and liaising between the college ECE dept and C-DAC representatives.',
+        images: ['https://placehold.co/800x450/0d0d0d/10b981?text=Vegathon+Photo+1'],
+      },
+      { 
+        title: 'Media Member', 
+        sub: '@RSET Media Team', 
+        img: 'Repeater.png',
+        desc: 'Contributing to recording/capturing collegiate events and coordinating technical media infrastructure for major celebrations.',
+        details: 'Shot and edited coverage for 10+ college events including annual days, tech fests, and departmental fests. Managed camera crew scheduling and delivered final edited videos within tight deadlines.',
+        images: ['https://placehold.co/800x450/0d0d0d/10b981?text=Media+Photo+1', 'https://placehold.co/800x450/0d0d0d/10b981?text=Media+Photo+2'],
+      },
+      { 
+        title: 'Technical Coord & Organizing', 
+        sub: '@Electronauts', 
+        img: 'comparator.png',
+        desc: 'Organized tech-fest events including Blindbuild 2.0, Codequest 2.0, Chips2Silicon, and Wire it right and many other activity hour events.',
+        details: 'Designed problem statements, sourced components, and managed scoring rubrics for 5 major events. Also mentored junior members on hardware challenge setup and coordinated with faculty advisors.',
+        images: ['https://placehold.co/800x450/0d0d0d/10b981?text=Electronauts+Photo+1'],
+      },
+      { 
+        title: 'Volunteering', 
+        sub: '@IEDC & GDSC Events', 
+        img: 'piston.png',
+        desc: 'Contributed to organizing many tech events from normal activity hours to national-level tech fests.',
+        details: 'Volunteered at 8+ events run by IEDC and GDSC chapters, handling registration desks, stage management, and participant coordination.',
+        images: ['https://placehold.co/800x450/0d0d0d/10b981?text=Volunteering+Photo+1'],
+      },
+    ] as ModalItem[]
+  );
 
   return (
     <section id="experience" className="min-h-screen py-32 bg-[#4a3424] text-white relative overflow-hidden">
@@ -676,33 +727,82 @@ const MinecraftSection = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: false }}
               transition={{ delay: i * 0.1 }}
-              className="bg-[#3d2b1f] p-8 border-4 border-slate-900 shadow-[inset_4px_4px_0px_0px_rgba(255,255,255,0.05),inset_-4px_-4px_0px_0px_rgba(0,0,0,0.4)] flex flex-col sm:flex-row gap-8 items-center sm:items-start group hover:bg-[#523d2d] transition-colors"
+              // ── CLICKABLE: opens the detail modal for this experience ──
+              onClick={() => setActiveExp(exp)}
+              className="bg-[#3d2b1f] p-8 border-4 border-slate-900 shadow-[inset_4px_4px_0px_0px_rgba(255,255,255,0.05),inset_-4px_-4px_0px_0px_rgba(0,0,0,0.4)] flex flex-col sm:flex-row gap-8 items-center sm:items-start group hover:bg-[#523d2d] transition-colors cursor-pointer"
             >
               <div className="shrink-0 w-[80px] h-[80px] bg-slate-900/40 border-4 border-slate-900 flex items-center justify-center p-2 group-hover:-translate-y-1 transition-transform">
-                <img src={exp.img} alt={exp.icon} className="w-full h-full object-contain -mt-[2px]" />
+                <img src={(exp as any).img} alt={exp.title} className="w-full h-full object-contain -mt-[2px]" />
               </div>
-              <div className="text-center sm:text-left">
+              <div className="text-center sm:text-left flex-1">
                 <h3 className="text-xl font-bold mb-1 text-white uppercase font-minecraft">{exp.title}</h3>
-                <p className="text-[#10b981] text-xs mb-4 uppercase tracking-[0.2em] font-minecraft">@{exp.sub}</p>
+                <p className="text-[#10b981] text-xs mb-4 uppercase tracking-[0.2em] font-minecraft">{exp.sub}</p>
                 <p className="text-stone-300 text-xs leading-relaxed font-sans font-medium">{exp.desc}</p>
+                {/* Hint that the card is expandable */}
+                <p className="text-white/20 text-[10px] uppercase tracking-widest mt-4 group-hover:text-emerald-400/60 transition-colors">Click to expand →</p>
               </div>
             </motion.div>
           ))}
         </div>
       </div>
+
+      {/* ── MODAL — renders on top of everything when a card is clicked ── */}
+      {activeExp && <DetailModal item={activeExp} onClose={() => setActiveExp(null)} theme="minecraft" />}
     </section>
   );
 };
 
 const SchematicSection = () => {
-  const projects = [
-    { title: 'Audio Spectrum Analyzer', id: 'ECE_001', tags: ['Analog', 'DSP'], desc: '2 Band Audio Spectrum Analyzer with real-time waveform visualization and signal capture.' },
-    { title: '4-Bit Binary Adder', id: 'ECE_002', tags: ['Hardware', 'Transistors'], desc: 'Complete binary adder logic implemented using only discrete transistors to demonstrate logic gate synthesis.' },
-    { title: 'Robotic Arm Sim', id: 'ECE_003', tags: ['ROS', 'Gazebo', 'Rviz'], desc: 'Detailed simulation of robotic arm movements including kinematics and motion planning environments.' },
-    { title: 'BT RC Car Control', id: 'ECE_004', tags: ['Arduino', 'Bluetooth', 'LCD'], desc: 'Wireless vehicle control system with real-time telemetry displayed on a mounted LCD interface.' },
-    { title: 'Freq Multiplier', id: 'ECE_005', tags: ['CD4046', 'PLL'], desc: 'Signal synthesis circuit for frequency multiplication utilizing Phase-Locked Loop (PLL) stability.' },
-    { title: 'Light Screaming Circuit', id: 'ECE_006', tags: ['Oscillator', 'Sensors'], desc: 'Analog oscillator whose audio frequency scales linearly with incident light intensity.' },
-  ];
+  const [activeProj, setActiveProj] = useState<ModalItem | null>(null);
+
+  const projects = (
+    [
+      {
+        title: 'Audio Spectrum Analyzer', id: 'ECE_001', tags: ['Analog', 'DSP'],
+        sub: 'ECE_001 // Analog & DSP',
+        desc: '2 Band Audio Spectrum Analyzer with real-time waveform visualization and signal capture.',
+        // ── REPLACE details: schematic overview, challenges, results ──
+        details: 'Built using op-amp bandpass filters and an LM3914 bar-graph driver. The two bands (bass & treble) are split at 1 kHz. Signal capture was implemented with a peak-detector circuit feeding an ADC. Tested with a function generator across 20 Hz – 20 kHz.',
+        // ── REPLACE images: add your schematic screenshots, PCB photos, demo videos ──
+        images: ['https://placehold.co/800x450/0d0d0d/10b981?text=Spectrum+Analyzer+Schematic', 'https://placehold.co/800x450/0d0d0d/10b981?text=PCB+Photo'],
+      },
+      {
+        title: '4-Bit Binary Adder', id: 'ECE_002', tags: ['Hardware', 'Transistors'],
+        sub: 'ECE_002 // Discrete Logic',
+        desc: 'Complete binary adder logic implemented using only discrete transistors to demonstrate logic gate synthesis.',
+        details: 'Implemented NAND-NAND logic using BC547 NPN transistors on a breadboard. Full adder cells were cascaded to achieve 4-bit addition with carry propagation. Final output verified with a 7-segment display.',
+        images: ['https://placehold.co/800x450/0d0d0d/10b981?text=Binary+Adder+Photo'],
+      },
+      {
+        title: 'Robotic Arm Sim', id: 'ECE_003', tags: ['ROS', 'Gazebo', 'Rviz'],
+        sub: 'ECE_003 // Robotics',
+        desc: 'Detailed simulation of robotic arm movements including kinematics and motion planning environments.',
+        details: 'Developed a 6-DOF robot arm URDF model and simulated it in Gazebo with ROS Noetic. Implemented inverse kinematics via MoveIt! and visualized joint trajectories in RViz. Used a Python script to define pick-and-place sequences.',
+        images: ['https://placehold.co/800x450/0d0d0d/10b981?text=ROS+Simulation+Screenshot'],
+      },
+      {
+        title: 'BT RC Car Control', id: 'ECE_004', tags: ['Arduino', 'Bluetooth', 'LCD'],
+        sub: 'ECE_004 // Embedded',
+        desc: 'Wireless vehicle control system with real-time telemetry displayed on a mounted LCD interface.',
+        details: 'Designed around an Arduino Uno and HC-05 Bluetooth module. Motor control via L298N H-bridge. A 16×2 LCD shows speed and direction in real time. Android app (MIT App Inventor) sends commands over BT serial.',
+        images: ['https://placehold.co/800x450/0d0d0d/10b981?text=RC+Car+Photo', 'https://placehold.co/800x450/0d0d0d/10b981?text=Circuit+Diagram'],
+      },
+      {
+        title: 'Freq Multiplier', id: 'ECE_005', tags: ['CD4046', 'PLL'],
+        sub: 'ECE_005 // Analog',
+        desc: 'Signal synthesis circuit for frequency multiplication utilizing Phase-Locked Loop (PLL) stability.',
+        details: 'Used the CD4046 PLL IC with a CD4017 divide-by-N counter in the feedback loop to achieve integer frequency multiplication (×2, ×4, ×8). Output verified on an oscilloscope with <0.1% frequency error at 10 kHz.',
+        images: ['https://placehold.co/800x450/0d0d0d/10b981?text=PLL+Circuit+Photo'],
+      },
+      {
+        title: 'Light Screaming Circuit', id: 'ECE_006', tags: ['Oscillator', 'Sensors'],
+        sub: 'ECE_006 // Analog',
+        desc: 'Analog oscillator whose audio frequency scales linearly with incident light intensity.',
+        details: 'Built around a 555 timer in astable mode with an LDR in the RC network. As light increases, resistance drops, raising the oscillation frequency. Output drives a small speaker directly. Fun demo for illustrating RC time constants.',
+        images: ['https://placehold.co/800x450/0d0d0d/10b981?text=Light+Circuit+Demo'],
+      },
+    ] as ModalItem[]
+  );
 
   return (
     <section id="projects" className="min-h-screen py-32 bg-[#111111] text-emerald-500 font-sans relative overflow-hidden">
@@ -730,13 +830,15 @@ const SchematicSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false }}
               transition={{ delay: i * 0.1 }}
-              className="group border border-emerald-500/20 bg-emerald-950/10 p-8 hover:bg-emerald-500/5 hover:border-emerald-500/40 transition-all relative overflow-hidden"
+              // ── CLICKABLE: opens the detail modal for this project ──
+              onClick={() => setActiveProj(proj)}
+              className="group border border-emerald-500/20 bg-emerald-950/10 p-8 hover:bg-emerald-500/5 hover:border-emerald-500/40 transition-all relative overflow-hidden cursor-pointer"
             >
               <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-emerald-500/30 group-hover:border-emerald-500/60 transition-colors" />
               <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-emerald-500/30 group-hover:border-emerald-500/60 transition-colors" />
 
               <div className="text-[10px] text-emerald-500/50 mb-8 flex justify-between items-center font-bold">
-                <span className="bg-emerald-950 px-2 py-1 border border-emerald-500/20 uppercase">{proj.id}</span>
+                <span className="bg-emerald-950 px-2 py-1 border border-emerald-500/20 uppercase">{(proj as any).id}</span>
               </div>
               
               <h3 className="text-2xl font-bold uppercase mb-6 text-white group-hover:text-emerald-400 transition-colors tracking-tight">
@@ -747,37 +849,53 @@ const SchematicSection = () => {
                 {proj.desc}
               </p>
               
-              <div className="flex flex-wrap gap-2">
-                {proj.tags.map(tag => (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {(proj as any).tags.map((tag: string) => (
                   <span key={tag} className="text-[9px] px-2 py-1 border border-emerald-500/10 text-emerald-500/20 uppercase font-black">
                     {tag}
                   </span>
                 ))}
               </div>
+              <p className="text-white/15 text-[10px] uppercase tracking-widest group-hover:text-emerald-400/50 transition-colors">Click to expand →</p>
             </motion.div>
           ))}
         </div>
       </div>
+
+      {/* ── MODAL ── */}
+      {activeProj && <DetailModal item={activeProj} onClose={() => setActiveProj(null)} />}
     </section>
   );
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// SKILLS SECTION
+// To add a new skill: copy one object in the `skills` array below and fill in:
+//   title   → the skill name shown on the card
+//   icon    → any Lucide icon component
+//   level   → 0–100 (the % fill of the health bar)
+// ─────────────────────────────────────────────────────────────────────────────
 const InterestsSection = () => {
-  const interests = [
-    { title: 'Embedded Systems', icon: <Cpu className="w-8 h-8 transition-colors duration-300 group-hover:text-amber-400" />, color: 'emerald' },
-    { title: 'VLSI design', icon: <CircuitBoard className="w-8 h-8 transition-colors duration-300 group-hover:text-blue-400" />, color: 'blue' },
-    { title: 'DSP & Modulation', icon: <Monitor className="w-8 h-8 transition-colors duration-300 group-hover:text-purple-400" />, color: 'purple' },
-    { title: 'Industrial Safety', icon: <Layers className="w-8 h-8 transition-colors duration-300 group-hover:text-emerald-400" />, color: 'amber' },
+  const skills = [
+    { title: 'Embedded Systems',    icon: <Cpu className="w-8 h-8" />,          level: 90 },
+    { title: 'VLSI Design',         icon: <CircuitBoard className="w-8 h-8" />, level: 50 },
+    { title: 'Planning & Teamwork', icon: <Monitor className="w-8 h-8" />,      level: 80 },
+    { title: 'Coding',              icon: <Layers className="w-8 h-8" />,       level: 70 },
   ];
+
+  // Track which card is being hovered so we can show its health bar
+  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   return (
     <section id="interests" className="py-32 bg-[#111111] border-t border-emerald-500/10 relative overflow-hidden">
+      {/* Subtle grid background — same as Projects/Contact */}
       <div className="absolute inset-0 opacity-[0.05]" style={{
         backgroundImage: `linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px)`,
         backgroundSize: '80px 80px'
       }} />
+
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           className="mb-20 text-center"
@@ -787,20 +905,196 @@ const InterestsSection = () => {
         </motion.div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {interests.map((item, i) => (
+          {skills.map((item, i) => (
             <motion.div
               key={item.title}
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: false }}
               transition={{ delay: i * 0.1 }}
-              className="p-10 bg-black border border-white/10 rounded-2xl flex flex-col items-center text-center group hover:bg-white/5 hover:border-emerald-500/50 transition-all shadow-xl"
+              onMouseEnter={() => setHoveredIdx(i)}
+              onMouseLeave={() => setHoveredIdx(null)}
+              // Card style matches Contact section: bg-black/40 + border-white/10
+              className="p-10 bg-black/40 border border-white/10 rounded-2xl flex flex-col items-center text-center group hover:bg-emerald-500/5 hover:border-emerald-500/50 transition-all shadow-xl relative overflow-hidden"
             >
+              {/* Icon circle */}
               <div className="p-5 rounded-full bg-[#111111] border border-emerald-500/20 mb-6 group-hover:scale-110 transition-transform">
                 {React.cloneElement(item.icon as React.ReactElement, { className: 'text-emerald-400' })}
               </div>
-              <h3 className="text-white font-mono font-bold uppercase tracking-widest">{item.title}</h3>
+
+              {/* Skill name */}
+              <h3 className="text-white font-mono font-bold uppercase tracking-widest mb-4">{item.title}</h3>
+
+              {/* ── HEALTH BAR ─────────────────────────────────────────────
+                  Appears at the bottom of the card on hover.
+                  To change a skill's level, edit `level` in the skills array above.
+                  The bar width animates from 0 → level% using Framer Motion.
+              ─────────────────────────────────────────────────────────── */}
+              <div className="w-full mt-auto">
+                {/* Label row */}
+                <div className="flex justify-between items-center mb-1 h-4 overflow-hidden">
+                  <AnimatePresence>
+                    {hoveredIdx === i && (
+                      <motion.span
+                        key="label"
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 4 }}
+                        className="text-[9px] uppercase tracking-widest text-emerald-400/70 font-bold"
+                      >
+                        Proficiency
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                  <AnimatePresence>
+                    {hoveredIdx === i && (
+                      <motion.span
+                        key="pct"
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 4 }}
+                        className="text-[9px] text-emerald-400 font-bold"
+                      >
+                        {item.level}%
+                      </motion.span>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {/* Track */}
+                <div className="w-full h-2 bg-white/5 border border-emerald-500/10 rounded-full overflow-hidden">
+                  {/* Filled bar — animates in on hover */}
+                  <motion.div
+                    className="h-full bg-emerald-400 rounded-full"
+                    initial={{ width: '0%' }}
+                    animate={{ width: hoveredIdx === i ? `${item.level}%` : '0%' }}
+                    transition={{ duration: 0.6, ease: 'easeOut' }}
+                  />
+                </div>
+              </div>
             </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// CERTIFICATIONS SECTION
+// To add a certification: copy one object in `certs` and fill in:
+//   title  → cert name
+//   issuer → who issued it
+//   date   → when you got it
+//   color  → any Tailwind border color class e.g. 'border-emerald-400'
+// The belt automatically duplicates the list so it loops seamlessly.
+// ─────────────────────────────────────────────────────────────────────────────
+const CertificationsSection = () => {
+  const certs = [
+    // ── REPLACE THESE WITH YOUR REAL CERTIFICATES ──────────────────────────
+    { title: 'PLC Programming Fundamentals', issuer: 'Magnum Technology Center',       date: 'Jun 2025', color: 'border-emerald-400' },
+    { title: 'Industrial Safety Standards',   issuer: 'JAFZA Training Institute',       date: 'Jun 2025', color: 'border-cyan-400'    },
+    { title: 'Embedded C Programming',        issuer: 'Coursera / NPTEL',               date: 'Jan 2025', color: 'border-amber-400'   },
+    { title: 'VLSI Design Basics',            issuer: 'NPTEL',                          date: 'Dec 2024', color: 'border-purple-400'  },
+    { title: 'Arduino & IoT Workshop',        issuer: 'RSET Electronauts',              date: 'Sep 2024', color: 'border-blue-400'    },
+    { title: 'CarbonX Hackathon Organizer',   issuer: 'ECE Dept & C-DAC',              date: 'Mar 2025', color: 'border-pink-400'    },
+    // ────────────────────────────────────────────────────────────────────────
+  ];
+
+  // Speed is in px/s. Increases when mouse is near an edge.
+  const [speed, setSpeed] = useState(40);
+  const beltRef = useRef<HTMLDivElement>(null);
+  const animRef = useRef<number>(0);
+  const posRef  = useRef(0);
+  const speedRef = useRef(speed);
+
+  // Keep speedRef in sync
+  useEffect(() => { speedRef.current = speed; }, [speed]);
+
+  // Animate the belt using requestAnimationFrame for smooth, JS-driven scroll
+  useEffect(() => {
+    let last = performance.now();
+    const CARD_W  = 280 + 24; // card width + gap (px) — change if you resize cards
+    const TOTAL_W = CARD_W * certs.length; // width of one full copy of the list
+
+    const tick = (now: number) => {
+      const dt = (now - last) / 1000; // seconds since last frame
+      last = now;
+      posRef.current -= speedRef.current * dt;
+      // Reset when we've scrolled one full copy — creates seamless loop
+      if (posRef.current <= -TOTAL_W) posRef.current += TOTAL_W;
+      if (beltRef.current) {
+        beltRef.current.style.transform = `translateX(${posRef.current}px)`;
+      }
+      animRef.current = requestAnimationFrame(tick);
+    };
+    animRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(animRef.current);
+  }, [certs.length]);
+
+  // Detect mouse position relative to section to adjust speed
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x    = e.clientX - rect.left;
+    const w    = rect.width;
+    const EDGE = 120; // px from edge that triggers speed boost
+    if (x < EDGE || x > w - EDGE) {
+      setSpeed(110); // faster near edges
+    } else {
+      setSpeed(40);  // normal speed in the middle
+    }
+  };
+
+  return (
+    <section
+      id="certifications"
+      className="py-32 bg-[#111111] border-t border-emerald-500/10 relative overflow-hidden"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setSpeed(40)}
+    >
+      <div className="absolute inset-0 opacity-[0.05]" style={{
+        backgroundImage: `linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px)`,
+        backgroundSize: '80px 80px'
+      }} />
+
+      <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 mb-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <span className="text-[10px] uppercase tracking-[0.5em] text-emerald-500/40 font-bold block mb-4">SECTION_05 // CREDENTIALS</span>
+          <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter">Certifications</h2>
+        </motion.div>
+      </div>
+
+      {/* Conveyor belt — overflows the section so cards slide edge-to-edge */}
+      <div className="relative overflow-hidden">
+        {/* Left fade mask */}
+        <div className="absolute left-0 top-0 bottom-0 w-24 bg-gradient-to-r from-[#111111] to-transparent z-10 pointer-events-none" />
+        {/* Right fade mask */}
+        <div className="absolute right-0 top-0 bottom-0 w-24 bg-gradient-to-l from-[#111111] to-transparent z-10 pointer-events-none" />
+
+        {/* Belt — contains TWO copies of the list for seamless looping */}
+        <div ref={beltRef} className="flex gap-6 will-change-transform" style={{ width: 'max-content' }}>
+          {/* Render the list twice so the loop is seamless */}
+          {[...certs, ...certs].map((cert, i) => (
+            <div
+              key={i}
+              // ── CERTIFICATE CARD ──────────────────────────────────────────
+              // w-[280px] = card width. Change here AND update CARD_W in useEffect above.
+              // color (border) is set per-cert in the certs array at the top.
+              className={`w-[280px] shrink-0 p-6 bg-black/40 border ${cert.color} rounded-2xl border-opacity-40 hover:border-opacity-100 transition-all group`}
+            >
+              {/* Cert icon placeholder — replace with an <img> of the cert logo if you have one */}
+              <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
+                <Zap className="w-5 h-5 text-emerald-400" />
+              </div>
+              {/* ── REPLACE: cert.title and cert.issuer in the certs array above ── */}
+              <h3 className="text-white font-bold text-sm uppercase tracking-tight mb-1 leading-snug">{cert.title}</h3>
+              <p  className="text-emerald-400/60 text-[11px] uppercase tracking-widest mb-3">{cert.issuer}</p>
+              <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest">{cert.date}</span>
+            </div>
           ))}
         </div>
       </div>
@@ -834,7 +1128,7 @@ const ContactSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           className="mb-20 text-center"
         >
-          <span className="text-[10px] uppercase tracking-[0.5em] text-emerald-500/40 font-bold block mb-4">SECTION_05 // COMMS_ESTABLISHED</span>
+          <span className="text-[10px] uppercase tracking-[0.5em] text-emerald-500/40 font-bold block mb-4">SECTION_06 // COMMS_ESTABLISHED</span>
           <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter">Get In Touch</h2>
         </motion.div>
 
@@ -896,7 +1190,7 @@ export default function App() {
     if (state !== 'portfolio') return;
 
     const handleScroll = () => {
-      const sections = ['intro', 'experience', 'projects', 'interests', 'contact'];
+      const sections = ['intro', 'experience', 'projects', 'interests', 'certifications', 'contact'];
       
       // Check if we're near the bottom of the page first (for Contact section)
       const scrollPosition = window.scrollY;
@@ -999,6 +1293,16 @@ export default function App() {
               >
                 Skills
               </button>
+              <button 
+                onClick={() => scrollToSection('certifications')} 
+                className={`px-4 py-2 transition-all rounded cursor-pointer hover:scale-110 active:scale-95 uppercase border-2 ${
+                  activeSection === 'certifications' 
+                    ? 'border-slate-900 text-slate-900 bg-white/50' 
+                    : activeSection === 'contact' ? 'border-transparent text-white/60 hover:text-white hover:bg-white/10' : 'border-transparent text-black hover:text-white hover:bg-black'
+                }`}
+              >
+                Certifications
+              </button>
             </nav>
 
             <div className="flex items-center gap-4">
@@ -1020,6 +1324,7 @@ export default function App() {
             <MinecraftSection />
             <SchematicSection />
             <InterestsSection />
+            <CertificationsSection />
             <ContactSection />
           </main>
 
