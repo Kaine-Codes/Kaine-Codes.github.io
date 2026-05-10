@@ -331,10 +331,26 @@ const LegoSection = () => {
               </svg>
             )}
 
-            <h1 className={`font-sans font-black text-slate-900 leading-none tracking-tighter uppercase relative z-10 ${isMobile ? 'flex items-baseline text-5xl sm:text-7xl gap-3' : 'flex items-baseline whitespace-nowrap text-8xl md:text-[10rem] lg:text-[11rem]'}`}>
+            <h1 className={`font-sans font-black text-slate-900 leading-none tracking-tighter uppercase relative z-10 ${isMobile ? 'flex flex-col items-start text-6xl' : 'flex items-baseline whitespace-nowrap text-7xl md:text-9xl'}`}>
               <span className="relative inline-block shrink-0">
                 <span className="relative z-10">
                   SHINE
+                  <motion.div
+                    className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent z-10"
+                    initial={{ x: '-100%', opacity: 1 }}
+                    whileInView={{ 
+                      x: ['-100%', '60%'],
+                      opacity: [1, 1, 0]
+                    }}
+                    viewport={{ once: false }}
+                    transition={{ 
+                      duration: 1.2, 
+                      times: [0, 0.6, 1],
+                      repeat: 0, 
+                      repeatDelay: 2, 
+                      ease: "easeInOut" 
+                    }}
+                  />
                   <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
@@ -372,24 +388,24 @@ const LegoSection = () => {
                 </span>
               </span>
               <span 
-                className={`${isMobile ? 'text-[4rem] sm:text-[6rem] -translate-y-1' : 'ml-4 md:ml-8 text-9xl md:text-[11rem] lg:text-[12rem] -translate-y-1'} normal-case font-cursive transition-all duration-300 tracking-[0.05em] ${isCircuitOn ? 'text-[#fbbf24] drop-shadow-[0_0_20px_#fddb3c]' : 'text-[#4a3f12]'}`}
+                className={`${isMobile ? 'text-[6rem] mt-1 ml-0' : 'ml-6 md:ml-12 text-9xl md:text-[15rem]'} normal-case font-cursive transition-all duration-300 tracking-[0.05em] -translate-y-1 ${isCircuitOn ? 'text-[#fbbf24] drop-shadow-[0_0_20px_#fddb3c]' : 'text-[#4a3f12]'}`}
                 style={{ 
                   textShadow: isCircuitOn 
                     ? '0 0 7px #fff, 0 0 10px #fff, 0 0 21px #fddb3c, 0 0 42px #fddb3c, 0 0 82px #fddb3c, 0 0 92px #fddb3c, 0 0 102px #fddb3c' 
                     : 'none'
                 }}
               >
-                Daniel
+                DANIEL
               </span>
             </h1>
             {/* Battery shape wrapping the red sentence */}
             {/* POSITIONING WRAPPER: change -translate-y-22 to move up/down, add ml-N to shift right */}
-            <div className={`relative z-10 flex items-center ${isMobile ? 'mt-4' : '-translate-y-16'}`}>
+            <div className={`relative z-10 flex items-center ${isMobile ? 'mt-2' : '-translate-y-22'}`}>
 
               {/* MAIN BODY: border-2 = border thickness, px-8 = width padding, py-5 = height padding */}
               {/* bg-white/20 = transparency (20=very transparent, 60=more visible) */}
-              <div className={`flex items-center border-4 border-slate-900 bg-white shadow-[6px_6px_0px_0px_rgba(0,0,0,0.1)] ${isMobile ? 'px-6 py-4' : 'px-8 py-5'}`}>
-                <p className={`font-bold text-[#e53935] uppercase font-sans tracking-tight ${isMobile ? 'text-lg whitespace-normal leading-tight' : 'text-3xl md:text-4xl lg:text-5xl whitespace-nowrap'}`}>
+              <div className={`flex items-center border-3 border-slate-900/70 bg-white/40 backdrop-blur-sm ${isMobile ? 'px-4 py-3' : 'px-2 py-4'}`}>
+                <p className={`font-bold text-[#e53935] uppercase font-sans tracking-tight ${isMobile ? 'text-base whitespace-normal leading-tight' : 'text-3xl md:text-4xl whitespace-nowrap'}`}>
                 Aspiring VLSI &amp; Embedded Systems Engineer
                 </p>
               </div>
@@ -397,7 +413,7 @@ const LegoSection = () => {
               {/* CAP NUB: sits OUTSIDE the body border so it protrudes visually */}
               {/* w-4 = nub width, h-10 = nub height (shorter than body = protrudes inward on top+bottom) */}
               {/* Change w-4→w-6 for wider nub, h-10→h-8 for more protrusion effect */}
-              <div className={`border-4 border-l-0 border-slate-900 bg-white self-center ${isMobile ? 'w-4 h-8' : 'w-6 h-14'}`} />
+              <div className={`border-3 border-slate-900/70 bg-white/20 backdrop-blur-sm self-center ${isMobile ? 'w-3 h-6' : 'w-4 h-10'}`} />
 
             </div>
           </motion.div>
@@ -576,7 +592,7 @@ const DetailModal = ({ item, onClose, theme = 'modern' }: { item: ModalItem; onC
 
           {/* ── RIGHT COLUMN: Image Slider ── */}
           <div className={`w-full md:w-[45%] shrink-0 flex flex-col items-center justify-center p-4 relative z-10 ${
-            isMinecraft ? 'pt-16 bg-black/20' : 'bg-black/40'
+            isMinecraft ? 'bg-black/20 pt-16' : 'bg-black/40'
           }`}>
             <div className={`relative w-full aspect-[4/3] overflow-hidden bg-black/60 shadow-inner ${
               isMinecraft ? 'border-4 border-[#2d1f14]' : 'rounded-xl border border-white/5'
