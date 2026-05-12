@@ -1,11 +1,217 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Terminal, Github, Linkedin, ExternalLink, Cpu, Code2, Rocket, DraftingCompass, Database, Layers, Radio, CircuitBoard, Mail, Phone, MapPin, Zap, Monitor } from 'lucide-react';
+import { Terminal, Github, Linkedin, ExternalLink, Cpu, Code2, Rocket, DraftingCompass, Cable, Braces, Database, Layers, Radio, CircuitBoard, Mail, Phone, MapPin, Zap, Monitor } from 'lucide-react';
 
 // --- Types ---
 type AppState = 'loading' | 'terminal' | 'portfolio';
 
 // --- Intro Components ---
+
+const CircuitBackground = ({ gridVisible = true }: { gridVisible?: boolean }) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const pointsRef = useRef<{ x: number; y: number; lastSpawn: number }[]>([]);
+  const tracesRef = useRef<{ 
+    path: { x: number; y: number }[]; 
+    progress: number; 
+    opacity: number; 
+    color: string; 
+    width: number;
+    speed: number;
+  }[]>([]);
+  const mouseRef = useRef({ x: -1000, y: -1000 });
+  const isVisible = useRef(false);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Use Intersection Observer to only run when visible
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isVisible.current = entry.isIntersecting;
+      },
+      { threshold: 0.1 }
+    );
+    if (canvas) observer.observe(canvas);
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = canvas.parentElement?.offsetHeight || window.innerHeight;
+      
+      const gap = 40;
+      const points = [];
+      for (let x = 0; x < canvas.width + gap; x += gap) {
+        for (let y = 0; y < canvas.height + gap; y += gap) {
+          points.push({ x, y, lastSpawn: 0 });
+        }
+      }
+      pointsRef.current = points;
+    };
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    const spawnTrace = (pt: { x: number; y: number }) => {
+      const segments = 3; 
+      const path = [{ x: pt.x, y: pt.y }];
+      let curX = pt.x;
+      let curY = pt.y;
+      const step = 40; 
+
+      for (let i = 0; i < segments; i++) {
+        const dx = mouseRef.current.x - curX;
+        const dy = mouseRef.current.y - curY;
+        const targetAngle = Math.atan2(dy, dx);
+        
+        const angles = [0, 45, 90, 135, 180, 225, 270, 315];
+        let bestAngle = angles[0] * (Math.PI / 180);
+        let minDiff = Infinity;
+
+        angles.forEach(a => {
+          const rad = a * (Math.PI / 180);
+          let diff = Math.abs(targetAngle - rad);
+          if (diff > Math.PI) diff = 2 * Math.PI - diff;
+          if (diff < minDiff) {
+            minDiff = diff;
+            bestAngle = rad;
+          }
+        });
+
+        if (Math.random() < 0.2) {
+          bestAngle = angles[Math.floor(Math.random() * angles.length)] * (Math.PI / 180);
+        }
+        
+        curX += Math.round(Math.cos(bestAngle)) * step;
+        curY += Math.round(Math.sin(bestAngle)) * step;
+        path.push({ x: curX, y: curY });
+      }
+
+      tracesRef.current.push({
+        path,
+        progress: 0,
+        opacity: 1,
+        color: '#10b981', 
+        width: Math.random() < 0.4 ? 2 : 1,
+        speed: 0.15 + Math.random() * 0.1 // Faster growth
+      });
+    };
+
+    let animationFrame: number;
+    const animate = () => {
+      if (isVisible.current) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const now = Date.now();
+
+        // Draw Grid
+        if (gridVisible) {
+          ctx.fillStyle = 'rgba(52, 211, 153, 0.15)'; 
+          pointsRef.current.forEach(pt => {
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, 1.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Spawn check
+            const dx = pt.x - mouseRef.current.x;
+            const dy = pt.y - mouseRef.current.y;
+            const distSq = dx * dx + dy * dy;
+
+            if (distSq < 6400 && now - pt.lastSpawn > 1200) { // 80^2 = 6400
+              spawnTrace(pt);
+              pt.lastSpawn = now;
+            }
+          });
+        }
+
+        // Traces
+        for (let i = tracesRef.current.length - 1; i >= 0; i--) {
+          const trace = tracesRef.current[i];
+          
+          if (trace.progress < trace.path.length - 1) {
+            trace.progress += trace.speed;
+          } else {
+            trace.opacity -= 0.04; // Fast fade
+          }
+
+          if (trace.opacity <= 0) {
+            tracesRef.current.splice(i, 1);
+            continue;
+          }
+
+          ctx.strokeStyle = trace.color;
+          ctx.globalAlpha = trace.opacity * 0.9;
+          ctx.lineWidth = trace.width;
+          ctx.lineJoin = 'round';
+          ctx.lineCap = 'round';
+
+          ctx.beginPath();
+          ctx.moveTo(trace.path[0].x, trace.path[0].y);
+          
+          const fullSegments = Math.floor(trace.progress);
+          const partial = trace.progress % 1;
+
+          for (let j = 1; j <= fullSegments; j++) {
+            ctx.lineTo(trace.path[j].x, trace.path[j].y);
+          }
+
+          if (fullSegments < trace.path.length - 1) {
+            const last = trace.path[fullSegments];
+            const next = trace.path[fullSegments + 1];
+            ctx.lineTo(
+              last.x + (next.x - last.x) * partial,
+              last.y + (next.y - last.y) * partial
+            );
+          }
+          ctx.stroke();
+
+          const currentHead = fullSegments < trace.path.length - 1 
+            ? { 
+                x: trace.path[fullSegments].x + (trace.path[fullSegments+1].x - trace.path[fullSegments].x) * partial,
+                y: trace.path[fullSegments].y + (trace.path[fullSegments+1].y - trace.path[fullSegments].y) * partial
+              }
+            : trace.path[trace.path.length - 1];
+
+          ctx.fillStyle = trace.color;
+          ctx.beginPath();
+          ctx.arc(currentHead.x, currentHead.y, trace.width + 1, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      ctx.globalAlpha = 1;
+      animationFrame = requestAnimationFrame(animate);
+    };
+    animate();
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      mouseRef.current = {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top
+      };
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      window.removeEventListener('mousemove', handleMouseMove);
+      cancelAnimationFrame(animationFrame);
+      observer.disconnect();
+    };
+  }, [gridVisible]);
+
+  return (
+    <canvas 
+      ref={canvasRef} 
+      className="absolute inset-0 w-full h-full pointer-events-none opacity-50 z-30"
+      style={{ mixBlendMode: 'screen' }}
+    />
+  );
+};
 
 const LoadingScreen = ({ onComplete }: { onComplete: () => void; key?: string }) => {
   const [percent, setPercent] = useState(0);
@@ -425,7 +631,7 @@ const LegoSection = () => {
             transition={{ delay: 0.2 }}
             className="text-slate-800 text-2xl max-w-3xl font-medium leading-relaxed bg-white/40 backdrop-blur-sm p-8 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.05)]"
           >
-            Proactive Electronics enthusiast who loves to work on projects, gain knowledge and practical skills while building connections with like-minded individuals. I help shape a better future for Electronauts.
+            Proactive Electronics enthusiast who loves to work on projects, gain knowledge and practical skills while building connections with like-minded individuals. Helping shape a better community for electronics enthusiasts.
           </motion.p>
           
           <motion.div
@@ -774,7 +980,7 @@ const SchematicSection = () => {
   const projects = (
     [
       {
-        title: 'Audio Spectrum Analyzer', id: 'ECE_001', tags: ['Analog', 'DSP'],
+        title: 'Audio Spectrum Analyzer', id: 'ECE_001', tags: ['Analog', 'Filters'],
         sub: 'ECE_001 // Analog & DSP',
         desc: '2 Band Audio Spectrum Analyzer with real-time waveform visualization and signal capture.',
         // ── REPLACE details: schematic overview, challenges, results ──
@@ -822,10 +1028,7 @@ const SchematicSection = () => {
 
   return (
     <section id="projects" className="min-h-screen py-32 bg-[#111111] text-emerald-500 font-sans relative overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.05]" style={{
-        backgroundImage: `linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px)`,
-        backgroundSize: '80px 80px'
-      }} />
+      <CircuitBackground />
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         <motion.div
            initial={{ opacity: 0 }}
@@ -886,30 +1089,19 @@ const SchematicSection = () => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SKILLS SECTION
-// To add a new skill: copy one object in the `skills` array below and fill in:
-//   title   → the skill name shown on the card
-//   icon    → any Lucide icon component
-//   level   → 0–100 (the % fill of the health bar)
 // ─────────────────────────────────────────────────────────────────────────────
 const InterestsSection = () => {
   const skills = [
-    { title: 'Embedded Systems',    icon: <Cpu className="w-8 h-8" />,          level: 90 },
-    { title: 'VLSI Design',         icon: <CircuitBoard className="w-8 h-8" />, level: 50 },
-    { title: 'Planning & Teamwork', icon: <Monitor className="w-8 h-8" />,      level: 80 },
-    { title: 'Coding',              icon: <Layers className="w-8 h-8" />,       level: 70 },
+    { title: 'Embedded Systems',    icon: <Cpu className="w-8 h-8" /> },
+    { title: 'VLSI Design',         icon: <CircuitBoard className="w-8 h-8" /> },
+    { title: 'Planning & Teamwork', icon: <Layers className="w-8 h-8" /> },
+    { title: 'Coding',              icon: <Braces className="w-8 h-8" /> },
+    { title: 'Iot',                 icon: <Cable className="w-8 h-8" /> },
   ];
-
-  // Track which card is being hovered so we can show its health bar
-  const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
 
   return (
     <section id="interests" className="py-32 bg-[#111111] border-t border-emerald-500/10 relative overflow-hidden">
-      {/* Subtle grid background — same as Projects/Contact */}
-      <div className="absolute inset-0 opacity-[0.05]" style={{
-        backgroundImage: `linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px)`,
-        backgroundSize: '80px 80px'
-      }} />
-
+      <CircuitBackground />
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -920,7 +1112,7 @@ const InterestsSection = () => {
           <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter">Technical Arsenal</h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {skills.map((item, i) => (
             <motion.div
               key={item.title}
@@ -928,66 +1120,13 @@ const InterestsSection = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: false }}
               transition={{ delay: i * 0.1 }}
-              onMouseEnter={() => setHoveredIdx(i)}
-              onMouseLeave={() => setHoveredIdx(null)}
-              // Card style matches Contact section: bg-black/40 + border-white/10
-              className="p-10 bg-black/40 border border-white/10 rounded-2xl flex flex-col items-center text-center group hover:bg-emerald-500/5 hover:border-emerald-500/50 transition-all shadow-xl relative overflow-hidden"
+              className="p-8 bg-black/40 border border-white/10 rounded-2xl flex flex-col items-center text-center group hover:bg-emerald-500/5 hover:border-emerald-500/50 transition-all shadow-xl relative overflow-hidden"
             >
-              {/* Icon circle */}
               <div className="p-5 rounded-full bg-[#111111] border border-emerald-500/20 mb-6 group-hover:scale-110 transition-transform">
                 {React.cloneElement(item.icon as React.ReactElement, { className: 'text-emerald-400' })}
               </div>
 
-              {/* Skill name */}
-              <h3 className="text-white font-mono font-bold uppercase tracking-widest mb-4">{item.title}</h3>
-
-              {/* ── HEALTH BAR ─────────────────────────────────────────────
-                  Appears at the bottom of the card on hover.
-                  To change a skill's level, edit `level` in the skills array above.
-                  The bar width animates from 0 → level% using Framer Motion.
-              ─────────────────────────────────────────────────────────── */}
-              <div className="w-full mt-auto">
-                {/* Label row */}
-                <div className="flex justify-between items-center mb-1 h-4 overflow-hidden">
-                  <AnimatePresence>
-                    {hoveredIdx === i && (
-                      <motion.span
-                        key="label"
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 4 }}
-                        className="text-[9px] uppercase tracking-widest text-emerald-400/70 font-bold"
-                      >
-                        Proficiency
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                  <AnimatePresence>
-                    {hoveredIdx === i && (
-                      <motion.span
-                        key="pct"
-                        initial={{ opacity: 0, y: 4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 4 }}
-                        className="text-[9px] text-emerald-400 font-bold"
-                      >
-                        {item.level}%
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Track */}
-                <div className="w-full h-2 bg-white/5 border border-emerald-500/10 rounded-full overflow-hidden">
-                  {/* Filled bar — animates in on hover */}
-                  <motion.div
-                    className="h-full bg-emerald-400 rounded-full"
-                    initial={{ width: '0%' }}
-                    animate={{ width: hoveredIdx === i ? `${item.level}%` : '0%' }}
-                    transition={{ duration: 0.6, ease: 'easeOut' }}
-                  />
-                </div>
-              </div>
+              <h3 className="text-white font-mono font-bold uppercase tracking-widest text-xs">{item.title}</h3>
             </motion.div>
           ))}
         </div>
@@ -1008,17 +1147,22 @@ const InterestsSection = () => {
 const CertificationsSection = () => {
   const certs = [
     // ── REPLACE THESE WITH YOUR REAL CERTIFICATES ──────────────────────────
-    { title: 'PLC Programming Fundamentals', issuer: 'Magnum Technology Center',       date: 'Jun 2025', color: 'border-emerald-400' },
-    { title: 'Industrial Safety Standards',   issuer: 'JAFZA Training Institute',       date: 'Jun 2025', color: 'border-cyan-400'    },
-    { title: 'Embedded C Programming',        issuer: 'Coursera / NPTEL',               date: 'Jan 2025', color: 'border-amber-400'   },
-    { title: 'VLSI Design Basics',            issuer: 'NPTEL',                          date: 'Dec 2024', color: 'border-purple-400'  },
-    { title: 'Arduino & IoT Workshop',        issuer: 'RSET Electronauts',              date: 'Sep 2024', color: 'border-blue-400'    },
-    { title: 'CarbonX Hackathon Organizer',   issuer: 'ECE Dept & C-DAC',              date: 'Mar 2025', color: 'border-pink-400'    },
+    { title: 'GIS Mapathon Win',                    issuer: 'NeST Digital',       date: 'Jun 2026',     color: 'border-emerald-400' },
+    { title: 'PCB Desgin Workshop',                 issuer: 'RSET/Electronauts',  date: 'Sept 2024',    color: 'border-cyan-400'    },
+    { title: 'Microprocessors and Microcontrollers',issuer: 'NPTEL',              date: 'Jan-Apr 2025', color: 'border-amber-400'   },
+    { title: 'ELectronauts Execom',                 issuer: 'RSET/ Electronauts', date: 'May 2026',     color: 'border-purple-400'  },
+    { title: 'IEDC Summit 2024',                    issuer: 'IEDC',               date: 'Sep 2024',     color: 'border-blue-400'    },
+    { title: 'CarbonX Hackathon Organizer',         issuer: 'ECE Dept & C-DAC',   date: 'Mar 2026',     color: 'border-pink-400'    },
+    { title: 'Abhiyanthriki Organizer',             issuer: 'RSET',               date: 'Oct 2025',     color: 'border-sky-900'    },
+    { title: 'Multiple Intercollege Maths Quizzes', issuer: 'Different Colleges', date: '2023-2026',    color: 'border-red-400'    },   
+    { title: 'Machine Learning for Engineering and science applications', issuer: 'NPTEL', date: '2026',color: 'border-lime-300'    },
+    { title: 'Bharatham - Art Festival',            issuer: 'RSET',               date: '2025-2026',    color: 'borde-indigo-400'    },
+    { title: 'Embedded Sensing, Actuation and Interfacing Systems', issuer: 'NPTEL', date: '2026',      color: 'border-orange-400'    },
     // ────────────────────────────────────────────────────────────────────────
   ];
 
   // Speed is in px/s. Increases when mouse is near an edge.
-  const [speed, setSpeed] = useState(40);
+  const [speed, setSpeed] = useState(110);
   const beltRef = useRef<HTMLDivElement>(null);
   const animRef = useRef<number>(0);
   const posRef  = useRef(0);
@@ -1055,9 +1199,9 @@ const CertificationsSection = () => {
     const w    = rect.width;
     const EDGE = 120; // px from edge that triggers speed boost
     if (x < EDGE || x > w - EDGE) {
-      setSpeed(110); // faster near edges
+      setSpeed(60); // faster near edges
     } else {
-      setSpeed(40);  // normal speed in the middle
+      setSpeed(110);  // normal speed in the middle
     }
   };
 
@@ -1068,11 +1212,7 @@ const CertificationsSection = () => {
       onMouseMove={handleMouseMove}
       onMouseLeave={() => setSpeed(40)}
     >
-      <div className="absolute inset-0 opacity-[0.05]" style={{
-        backgroundImage: `linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px)`,
-        backgroundSize: '80px 80px'
-      }} />
-
+      <CircuitBackground />
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10 mb-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -1129,15 +1269,7 @@ const ContactSection = () => {
 
   return (
     <section id="contact" className="py-32 bg-[#111111] relative overflow-hidden">
-      <div className="absolute inset-0 opacity-[0.05]" style={{
-        backgroundImage: `linear-gradient(#10b981 1px, transparent 1px), linear-gradient(90deg, #10b981 1px, transparent 1px)`,
-        backgroundSize: '80px 80px'
-      }} />
-      <div className="absolute inset-0 opacity-[0.03]" style={{
-        backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
-        backgroundSize: '40px 40px'
-      }} />
-      
+      <CircuitBackground />
       <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
