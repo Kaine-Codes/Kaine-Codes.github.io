@@ -207,7 +207,7 @@ const CircuitBackground = ({ gridVisible = true }: { gridVisible?: boolean }) =>
   return (
     <canvas 
       ref={canvasRef} 
-      className="absolute inset-0 w-full h-full pointer-events-none opacity-50 z-30"
+      className="absolute inset-0 w-full h-full pointer-events-none opacity-50 z-0"
       style={{ mixBlendMode: 'screen' }}
     />
   );
@@ -1051,7 +1051,7 @@ const SchematicSection = () => {
               transition={{ delay: i * 0.1 }}
               // ── CLICKABLE: opens the detail modal for this project ──
               onClick={() => setActiveProj(proj)}
-              className="group border border-emerald-500/20 bg-emerald-950/10 p-8 hover:bg-emerald-500/5 hover:border-emerald-500/40 transition-all relative overflow-hidden cursor-pointer"
+              className="group border border-emerald-500/20 bg-black/70 backdrop-blur-md p-8 hover:bg-black/80 hover:border-emerald-500/40 transition-all relative overflow-hidden cursor-pointer"
             >
               <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-emerald-500/30 group-hover:border-emerald-500/60 transition-colors" />
               <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-emerald-500/30 group-hover:border-emerald-500/60 transition-colors" />
@@ -1120,7 +1120,7 @@ const InterestsSection = () => {
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: false }}
               transition={{ delay: i * 0.1 }}
-              className="p-8 bg-black/40 border border-white/10 rounded-2xl flex flex-col items-center text-center group hover:bg-emerald-500/5 hover:border-emerald-500/50 transition-all shadow-xl relative overflow-hidden"
+              className="p-8 bg-black/70 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col items-center text-center group hover:bg-black/80 hover:border-emerald-500/50 transition-all shadow-xl relative overflow-hidden"
             >
               <div className="p-5 rounded-full bg-[#111111] border border-emerald-500/20 mb-6 group-hover:scale-110 transition-transform">
                 {React.cloneElement(item.icon as React.ReactElement, { className: 'text-emerald-400' })}
@@ -1240,7 +1240,7 @@ const CertificationsSection = () => {
               // ── CERTIFICATE CARD ──────────────────────────────────────────
               // w-[280px] = card width. Change here AND update CARD_W in useEffect above.
               // color (border) is set per-cert in the certs array at the top.
-              className={`w-[280px] shrink-0 p-6 bg-black/40 border ${cert.color} rounded-2xl border-opacity-40 hover:border-opacity-100 transition-all group`}
+              className={`w-[280px] shrink-0 p-6 bg-black/70 backdrop-blur-md border ${cert.color} rounded-2xl border-opacity-40 hover:border-opacity-100 transition-all group`}
             >
               {/* Cert icon placeholder — replace with an <img> of the cert logo if you have one */}
               <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center mb-4">
@@ -1286,7 +1286,7 @@ const ContactSection = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="p-8 bg-black/40 border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-emerald-500/60 hover:bg-emerald-500/5 transition-all group relative cursor-pointer"
+            className="p-8 bg-black/70 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-emerald-500/60 hover:bg-black/80 transition-all group relative cursor-pointer"
           >
             <Mail className="w-8 h-8 text-emerald-400 mb-4 group-hover:scale-110 transition-transform" />
             <span className="text-white text-sm font-medium">{copied === 'email' ? 'Copied!' : 'Mail'}</span>
@@ -1300,7 +1300,7 @@ const ContactSection = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="p-8 bg-black/40 border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-emerald-500/60 hover:bg-emerald-500/5 transition-all group cursor-pointer"
+            className="p-8 bg-black/70 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-emerald-500/60 hover:bg-black/80 transition-all group cursor-pointer"
           >
             <Github className="w-8 h-8 text-emerald-400 mb-4 group-hover:scale-110 transition-transform" />
             <span className="text-white text-sm font-medium">GitHub Profile</span>
@@ -1313,7 +1313,7 @@ const ContactSection = () => {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="p-8 bg-black/40 border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-emerald-500/60 hover:bg-emerald-500/5 transition-all group cursor-pointer"
+            className="p-8 bg-black/70 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col items-center text-center hover:border-emerald-500/60 hover:bg-black/80 transition-all group cursor-pointer"
           >
             <Linkedin className="w-8 h-8 text-emerald-400 mb-4 group-hover:scale-110 transition-transform" />
             <span className="text-white text-sm font-medium">LinkedIn Profile</span>
