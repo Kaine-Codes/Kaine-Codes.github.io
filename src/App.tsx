@@ -811,7 +811,7 @@ const DetailModal = ({ item, onClose, theme = 'modern' }: { item: ModalItem; onC
                     <video
                       key={slide}
                       src={item.images[slide]}
-                      className="w-full h-full object-contain bg-black"
+                      className="w-full h-full object-cover"
                       controls
                       playsInline
                       loop
@@ -820,7 +820,7 @@ const DetailModal = ({ item, onClose, theme = 'modern' }: { item: ModalItem; onC
                     <motion.img
                       key={slide}
                       src={src}
-                      className="w-full h-full object-contain bg-black"
+                      className="w-full h-full object-cover"
                       initial={{ opacity: 0, scale: 1.05 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4 }}
@@ -880,12 +880,12 @@ const MinecraftSection = () => {
         desc: 'Focused on PLC Programming and gaining exposure to industrial safety standards in JAFZA, Dubai (May-June 2025).',
         details: 'During this internship I worked with Allen-Bradley PLCs, learned ladder logic programming, and observed live industrial automation lines. I got hands-on exposure to JAFZA safety compliance standards and collaborated with engineers from 3 different countries.',
         images: [
-          '/pictures/MC_section/hardware internship/1.jpeg',
-          '/pictures/MC_section/hardware internship/2.jpeg',
-          '/pictures/MC_section/hardware internship/3.jpeg',
-          '/pictures/MC_section/hardware internship/4.jpeg',
-          '/pictures/MC_section/hardware internship/5.jpeg',
-          '/pictures/MC_section/hardware internship/6.jpeg',
+          {'/pictures/MC_section/hardware internship/1.jpeg',  fit: 'cover'   },
+          {'/pictures/MC_section/hardware internship/2.jpeg',  fit: 'cover'   },
+          {'/pictures/MC_section/hardware internship/3.jpeg',  fit: 'contain'   },
+          {'/pictures/MC_section/hardware internship/4.jpeg',  fit: 'cover'   },
+          {'/pictures/MC_section/hardware internship/5.jpeg',  fit: 'cover'   },
+          {'/pictures/MC_section/hardware internship/6.jpeg',  fit: 'cover'   },
         ],
       },
       { 
@@ -895,12 +895,12 @@ const MinecraftSection = () => {
         desc: 'Contributed to organizing many national-level hackathon - CarbonX, in collaboration with C-DAC.',
         details: 'Led logistics for the CarbonX national hackathon, coordinating with 200+ participants, managing event timelines, and liaising between the college ECE dept and C-DAC representatives.',
         images: [
-          '/pictures/MC_section/vegathon/1.jpeg',
-          '/pictures/MC_section/vegathon/3.jpeg',
-          '/pictures/MC_section/vegathon/4.jpeg',
-          '/pictures/MC_section/vegathon/5.jpeg',
-          '/pictures/MC_section/vegathon/6.jpeg',
-          '/pictures/MC_section/vegathon/7.JPG',
+          {'/pictures/MC_section/vegathon/1.jpeg',  fit: 'cover'   },
+          {'/pictures/MC_section/vegathon/3.jpeg',  fit: 'cover'   },
+          {'/pictures/MC_section/vegathon/4.jpeg',  fit: 'cover'   },
+          {'/pictures/MC_section/vegathon/5.jpeg',  fit: 'cover'   },
+          {'/pictures/MC_section/vegathon/6.jpeg',  fit: 'cover'   },
+          {'/pictures/MC_section/vegathon/7.JPG',   fit: 'cover'   },
         ],
       },
       { 
@@ -910,12 +910,12 @@ const MinecraftSection = () => {
         desc: 'Contributing to recording/capturing collegiate events and coordinating technical media infrastructure for major celebrations.',
         details: 'Shot and edited coverage for 10+ college events including annual days, tech fests, and departmental fests. Managed camera crew scheduling and delivered final edited videos within tight deadlines.',
         images: [
-          '/pictures/MC_section/media/1.jpg',
-          '/pictures/MC_section/media/2.jpg',
-          '/pictures/MC_section/media/3.JPG',
-          '/pictures/MC_section/media/4.JPG',
-          '/pictures/MC_section/media/5.jpeg',
-        ],
+            { src: '/pictures/MC_section/media/1.jpg',  fit: 'cover'   },
+            { src: '/pictures/MC_section/media/2.jpg',  fit: 'cover'   },
+            { src: '/pictures/MC_section/media/3.JPG',  fit: 'cover' },
+            { src: '/pictures/MC_section/media/4.JPG',  fit: 'contain'   },
+            { src: '/pictures/MC_section/media/5.jpeg', fit: 'cover'   },
+          ],
       },
       { 
         title: 'Technical Coord & Organizing', 
@@ -924,15 +924,15 @@ const MinecraftSection = () => {
         desc: 'Organized tech-fest events including Blindbuild 2.0, Codequest 2.0, Chips2Silicon, and Wire it right and many other activity hour events.',
         details: 'Designed problem statements, sourced components, and managed scoring rubrics for 5 major events. Also mentored junior members on hardware challenge setup and coordinated with faculty advisors.',
         images: [
-          '/pictures/MC_section/organizing_volunteering/1.JPG',
-          '/pictures/MC_section/organizing_volunteering/2.JPG',
-          '/pictures/MC_section/organizing_volunteering/3.JPG',
-          '/pictures/MC_section/organizing_volunteering/4.JPG',
-          '/pictures/MC_section/organizing_volunteering/5.jpeg',
-          '/pictures/MC_section/organizing_volunteering/6.JPG',
-          '/pictures/MC_section/organizing_volunteering/7.jpeg',
-          '/pictures/MC_section/organizing_volunteering/8.jpg',
-          '/pictures/MC_section/organizing_volunteering/9.jpg',
+          {'/pictures/MC_section/organizing_volunteering/1.JPG', fit: 'cover'}
+          {'/pictures/MC_section/organizing_volunteering/2.JPG', fit: 'cover'}
+          {'/pictures/MC_section/organizing_volunteering/3.JPG', fit: 'cover'}
+          {'/pictures/MC_section/organizing_volunteering/4.JPG', fit: 'contain'}
+          {'/pictures/MC_section/organizing_volunteering/5.jpeg',fit: 'cover'}
+          {'/pictures/MC_section/organizing_volunteering/6.JPG', fit: 'cover'}
+          {'/pictures/MC_section/organizing_volunteering/7.jpeg',fit: 'cover'}
+          {'/pictures/MC_section/organizing_volunteering/8.jpg', fit: 'contain'}
+          {'/pictures/MC_section/organizing_volunteering/9.jpg', fit: 'cover'}
         ],
       },
       { 
@@ -942,11 +942,11 @@ const MinecraftSection = () => {
         desc: 'Contributed to organizing many tech events from normal activity hours to national-level tech fests.',
         details: 'Volunteered at 8+ events run by IEDC and GDSC chapters, handling registration desks, stage management, and participant coordination.',
         images: [
-          '/pictures/MC_section/mapathon/1.jpeg',
-          '/pictures/MC_section/mapathon/2.JPG',
-          '/pictures/MC_section/mapathon/3.JPG',
-          '/pictures/MC_section/mapathon/4.jpeg',
-          '/pictures/MC_section/mapathon/5.jpeg',
+          {'/pictures/MC_section/mapathon/1.jpeg', fit: 'cover'}
+          {'/pictures/MC_section/mapathon/2.JPG',  fit: 'cover'}
+          {'/pictures/MC_section/mapathon/3.JPG',  fit: 'cover'}
+          {'/pictures/MC_section/mapathon/4.jpeg', fit: 'cover'}
+          {'/pictures/MC_section/mapathon/5.jpeg', fit: 'cover'}
         ],
       },
     ] as ModalItem[]
