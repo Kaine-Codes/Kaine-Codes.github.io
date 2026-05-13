@@ -808,23 +808,19 @@ const DetailModal = ({ item, onClose, theme = 'modern' }: { item: ModalItem; onC
                   const src = item.images[slide];
                   const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(src);
                   return isVideo ? (
-                    <motion.video
+                    <video
                       key={slide}
-                      src={src}
-                      className="w-full h-full object-cover"
-                      autoPlay
-                      muted
-                      loop
+                      src={item.images[slide]}
+                      className="w-full h-full object-contain bg-black"
+                      controls
                       playsInline
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.4 }}
+                      loop
                     />
                   ) : (
                     <motion.img
                       key={slide}
                       src={src}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain bg-black"
                       initial={{ opacity: 0, scale: 1.05 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4 }}
@@ -1035,6 +1031,7 @@ const SchematicSection = () => {
       {
         title: 'Audio Spectrum Analyzer', id: 'ECE_001', tags: ['Analog', 'Filters'],
         sub: 'ECE_001 // Analog & DSP',
+        highlight: 'border-amber-400',
         desc: '2 Band Audio Spectrum Analyzer with real-time waveform visualization and signal capture.',
         details: 'Built using op-amp bandpass filters and an LM3914 bar-graph driver. The two bands (bass & treble) are split at 1 kHz. Signal capture was implemented with a peak-detector circuit feeding an ADC. Tested with a function generator across 20 Hz – 20 kHz.',
         images: [
