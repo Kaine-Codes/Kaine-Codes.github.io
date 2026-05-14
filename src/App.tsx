@@ -470,7 +470,7 @@ const LegoSection = () => {
                 </defs>
                 <g className="transition-all duration-300" stroke="#080808" filter="url(#glow-wire)">
                   {/* Out of DANIEL (Right Side) → right → resistor → left → switch */}
-                  <path d="M 1045,160 L 1350,160" fill="none" strokeWidth="6" strokeLinecap="round" />
+                  <path d="M 1015,160 L 1350,160" fill="none" strokeWidth="6" strokeLinecap="round" />
                   {/* IEEE Resistor */}
                   <path d="M 1350,160 L 1350,185 L 1335,195 L 1365,205 L 1335,215 L 1365,225 L 1335,235 L 1365,245 L 1350,255 L 1350,280" fill="none" strokeWidth="6" strokeLinejoin="round" />
                   <path d="M 1350,280 L 1250,280" fill="none" strokeWidth="6" strokeLinecap="round" />
@@ -480,9 +480,9 @@ const LegoSection = () => {
                   <path d={isCircuitOn ? "M 1200,280 L 1250,280" : "M 1200,280 L 1235,255"} fill="none" strokeWidth="6" strokeLinecap="round" className="pointer-events-none" />
                   <rect x="1170" y="250" width="110" height="60" fill="transparent" stroke="none" className="pointer-events-auto cursor-pointer" onClick={() => setIsCircuitOn(!isCircuitOn)} />
                   {/* Switch → right end of red sentence / battery cap */}
-                  <path d="M 1200,280 L 1064,280" fill="none" strokeWidth="6" strokeLinecap="round" />
+                  <path d="M 1200,280 L 1035,280" fill="none" strokeWidth="6" strokeLinecap="round" />
                   {/* Left end of battery → up → left side of DANIEL */}
-                  <path d="M 53,280 L 18,280 L 18,203 L 500,203 L 500,102" fill="none" strokeWidth="6" strokeLinecap="round" />
+                  <path d="M 53,280 L 18,280 L 18,203 L 485,203 L 485,102" fill="none" strokeWidth="6" strokeLinecap="round" />
                 </g>
               </svg>
             )}
@@ -692,10 +692,12 @@ type ModalItem = {
   sub: string;
   desc: string;
   details: string;   // longer body text — replace placeholder below
-  images: string[];  // array of image paths/URLs — replace placeholder below
+  images: (string | { src: string; fit: 'cover' | 'contain' })[];  // array of image paths/URLs with optional fit property
   img?: string;      // icon for experiences
   id?: string;       // tracking id for projects
   tags?: string[];   // descriptive tags for projects
+  isFavorite?: boolean;  // mark as favorite project
+  isWIP?: boolean;   // mark as work in progress
 };
 
 const DetailModal = ({ item, onClose, theme = 'modern' }: { item: ModalItem; onClose: () => void; theme?: 'modern' | 'minecraft' }) => {
@@ -805,12 +807,14 @@ const DetailModal = ({ item, onClose, theme = 'modern' }: { item: ModalItem; onC
             }`}>
               {item.images && item.images.length > 0 ? (
                 (() => {
-                  const src = item.images[slide];
+                  const imgData = item.images[slide];
+                  const src = typeof imgData === 'string' ? imgData : imgData.src;
+                  const fit = typeof imgData === 'string' ? 'cover' : imgData.fit;
                   const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(src);
                   return isVideo ? (
                     <video
                       key={slide}
-                      src={item.images[slide]}
+                      src={src}
                       className="w-full h-full object-cover"
                       controls
                       playsInline
@@ -820,7 +824,7 @@ const DetailModal = ({ item, onClose, theme = 'modern' }: { item: ModalItem; onC
                     <motion.img
                       key={slide}
                       src={src}
-                      className="w-full h-full object-cover"
+                      className={`w-full h-full object-${fit}`}
                       initial={{ opacity: 0, scale: 1.05 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4 }}
@@ -880,12 +884,12 @@ const MinecraftSection = () => {
         desc: 'Focused on PLC Programming and gaining exposure to industrial safety standards in JAFZA, Dubai (May-June 2025).',
         details: 'During this internship I worked with Allen-Bradley PLCs, learned ladder logic programming, and observed live industrial automation lines. I got hands-on exposure to JAFZA safety compliance standards and collaborated with engineers from 3 different countries.',
         images: [
-          {src:'/pictures/MC_section/hardware internship/1.jpeg',  fit: 'cover'   },
-          {src:'/pictures/MC_section/hardware internship/2.jpeg',  fit: 'cover'   },
-          {src:'/pictures/MC_section/hardware internship/3.jpeg',  fit: 'contain'   },
-          {src:'/pictures/MC_section/hardware internship/4.jpeg',  fit: 'cover'   },
-          {src:'/pictures/MC_section/hardware internship/5.jpeg',  fit: 'cover'   },
-          {src:'/pictures/MC_section/hardware internship/6.jpeg',  fit: 'cover'   },
+          { src: '/pictures/MC_section/hardware internship/1.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/hardware internship/2.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/hardware internship/3.jpeg', fit: 'contain' },
+          { src: '/pictures/MC_section/hardware internship/4.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/hardware internship/5.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/hardware internship/6.jpeg', fit: 'cover' },
         ],
       },
       { 
@@ -895,12 +899,12 @@ const MinecraftSection = () => {
         desc: 'Contributed to organizing many national-level hackathon - CarbonX, in collaboration with C-DAC.',
         details: 'Led logistics for the CarbonX national hackathon, coordinating with 200+ participants, managing event timelines, and liaising between the college ECE dept and C-DAC representatives.',
         images: [
-          {src:'/pictures/MC_section/vegathon/1.jpeg',  fit: 'cover'   },
-          {src:'/pictures/MC_section/vegathon/3.jpeg',  fit: 'cover'   },
-          {src:'/pictures/MC_section/vegathon/4.jpeg',  fit: 'cover'   },
-          {src:'/pictures/MC_section/vegathon/5.jpeg',  fit: 'cover'   },
-          {src:'/pictures/MC_section/vegathon/6.jpeg',  fit: 'cover'   },
-          {src:'/pictures/MC_section/vegathon/7.JPG',   fit: 'cover'   },
+          { src: '/pictures/MC_section/vegathon/1.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/vegathon/3.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/vegathon/4.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/vegathon/5.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/vegathon/6.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/vegathon/7.JPG', fit: 'cover' },
         ],
       },
       { 
@@ -910,12 +914,12 @@ const MinecraftSection = () => {
         desc: 'Contributing to recording/capturing collegiate events and coordinating technical media infrastructure for major celebrations.',
         details: 'Shot and edited coverage for 10+ college events including annual days, tech fests, and departmental fests. Managed camera crew scheduling and delivered final edited videos within tight deadlines.',
         images: [
-            { src: '/pictures/MC_section/media/1.jpg',  fit: 'cover'   },
-            { src: '/pictures/MC_section/media/2.jpg',  fit: 'cover'   },
-            { src: '/pictures/MC_section/media/3.JPG',  fit: 'cover' },
-            { src: '/pictures/MC_section/media/4.JPG',  fit: 'contain'   },
-            { src: '/pictures/MC_section/media/5.jpeg', fit: 'cover'   },
-          ],
+          { src: '/pictures/MC_section/media/1.jpg', fit: 'cover' },
+          { src: '/pictures/MC_section/media/2.jpg', fit: 'cover' },
+          { src: '/pictures/MC_section/media/3.JPG', fit: 'cover' },
+          { src: '/pictures/MC_section/media/4.JPG', fit: 'contain' },
+          { src: '/pictures/MC_section/media/5.jpeg', fit: 'cover' },
+        ],
       },
       { 
         title: 'Technical Coord & Organizing', 
@@ -924,15 +928,15 @@ const MinecraftSection = () => {
         desc: 'Organized tech-fest events including Blindbuild 2.0, Codequest 2.0, Chips2Silicon, and Wire it right and many other activity hour events.',
         details: 'Designed problem statements, sourced components, and managed scoring rubrics for 5 major events. Also mentored junior members on hardware challenge setup and coordinated with faculty advisors.',
         images: [
-          {src:'/pictures/MC_section/organizing_volunteering/1.JPG', fit: 'cover'}
-          {src:'/pictures/MC_section/organizing_volunteering/2.JPG', fit: 'cover'}
-          {src:'/pictures/MC_section/organizing_volunteering/3.JPG', fit: 'cover'}
-          {src:'/pictures/MC_section/organizing_volunteering/4.JPG', fit: 'contain'}
-          {src:'/pictures/MC_section/organizing_volunteering/5.jpeg',fit: 'cover'}
-          {src:'/pictures/MC_section/organizing_volunteering/6.JPG', fit: 'cover'}
-          {src:'/pictures/MC_section/organizing_volunteering/7.jpeg',fit: 'cover'}
-          {src:'/pictures/MC_section/organizing_volunteering/8.jpg', fit: 'contain'}
-          {src:'/pictures/MC_section/organizing_volunteering/9.jpg', fit: 'cover'}
+          { src: '/pictures/MC_section/organizing_volunteering/1.JPG', fit: 'cover' },
+          { src: '/pictures/MC_section/organizing_volunteering/2.JPG', fit: 'cover' },
+          { src: '/pictures/MC_section/organizing_volunteering/3.JPG', fit: 'cover' },
+          { src: '/pictures/MC_section/organizing_volunteering/4.JPG', fit: 'contain' },
+          { src: '/pictures/MC_section/organizing_volunteering/5.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/organizing_volunteering/6.JPG', fit: 'cover' },
+          { src: '/pictures/MC_section/organizing_volunteering/7.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/organizing_volunteering/8.jpg', fit: 'contain' },
+          { src: '/pictures/MC_section/organizing_volunteering/9.jpg', fit: 'cover' },
         ],
       },
       { 
@@ -942,11 +946,11 @@ const MinecraftSection = () => {
         desc: 'Contributed to organizing many tech events from normal activity hours to national-level tech fests.',
         details: 'Volunteered at 8+ events run by IEDC and GDSC chapters, handling registration desks, stage management, and participant coordination.',
         images: [
-          {src:'/pictures/MC_section/mapathon/1.jpeg', fit: 'cover'}
-          {src:'/pictures/MC_section/mapathon/2.JPG',  fit: 'cover'}
-          {src:'/pictures/MC_section/mapathon/3.JPG',  fit: 'cover'}
-          {src:'/pictures/MC_section/mapathon/4.jpeg', fit: 'cover'}
-          {src:'/pictures/MC_section/mapathon/5.jpeg', fit: 'cover'}
+          { src: '/pictures/MC_section/mapathon/1.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/mapathon/2.JPG', fit: 'cover' },
+          { src: '/pictures/MC_section/mapathon/3.JPG', fit: 'cover' },
+          { src: '/pictures/MC_section/mapathon/4.jpeg', fit: 'cover' },
+          { src: '/pictures/MC_section/mapathon/5.jpeg', fit: 'cover' },
         ],
       },
     ] as ModalItem[]
@@ -1032,14 +1036,15 @@ const SchematicSection = () => {
         title: 'Audio Spectrum Analyzer', id: 'ECE_001', tags: ['Analog', 'Filters'],
         sub: 'ECE_001 // Analog & DSP',
         highlight: 'border-amber-400',
+        isFavorite: true,
         desc: '2 Band Audio Spectrum Analyzer with real-time waveform visualization and signal capture.',
         details: 'Built using op-amp bandpass filters and an LM3914 bar-graph driver. The two bands (bass & treble) are split at 1 kHz. Signal capture was implemented with a peak-detector circuit feeding an ADC. Tested with a function generator across 20 Hz – 20 kHz.',
         images: [
-          '/pictures/Projects/Spectrum_Analyzer/Demo2_1.mp4',
-          '/pictures/Projects/Spectrum_Analyzer/final_2.jpeg',
-          '/pictures/Projects/Spectrum_Analyzer/demo1_3.mp4',
-          '/pictures/Projects/Spectrum_Analyzer/assembly_4.jpeg',
-          '/pictures/Projects/Spectrum_Analyzer/testing_5.jpeg',
+          { src: '/pictures/Projects/Spectrum_Analyzer/Demo2_1.mp4', fit: 'cover' },
+          { src: '/pictures/Projects/Spectrum_Analyzer/final_2.jpeg', fit: 'cover' },
+          { src: '/pictures/Projects/Spectrum_Analyzer/demo1_3.mp4', fit: 'cover' },
+          { src: '/pictures/Projects/Spectrum_Analyzer/assembly_4.jpeg', fit: 'cover' },
+          { src: '/pictures/Projects/Spectrum_Analyzer/testing_5.jpeg', fit: 'cover' },
         ],
       },
       {
@@ -1048,8 +1053,8 @@ const SchematicSection = () => {
         desc: 'Complete binary adder logic implemented using only discrete transistors to demonstrate logic gate synthesis.',
         details: 'Implemented NAND-NAND logic using BC547 NPN transistors on a breadboard. Full adder cells were cascaded to achieve 4-bit addition with carry propagation. Final output verified with a 7-segment display.',
         images: [
-          '/pictures/Projects/BinaryAdder/demo.mp4',
-          '/pictures/Projects/BinaryAdder/final.jpeg',
+          { src: '/pictures/Projects/BinaryAdder/demo.mp4', fit: 'cover' },
+          { src: '/pictures/Projects/BinaryAdder/final.jpeg', fit: 'cover' },
         ],
       },
       {
@@ -1058,20 +1063,21 @@ const SchematicSection = () => {
         desc: 'Detailed simulation of robotic arm movements including kinematics and motion planning environments.',
         details: 'Developed a 6-DOF robot arm URDF model and simulated it in Gazebo with ROS Noetic. Implemented inverse kinematics via MoveIt! and visualized joint trajectories in RViz. Used a Python script to define pick-and-place sequences.',
         images: [
-          '/pictures/Projects/RoboticArm/Demo1.mp4',
-          '/pictures/Projects/RoboticArm/Demo2.mp4',
+          { src: '/pictures/Projects/RoboticArm/Demo1.mp4', fit: 'cover' },
+          { src: '/pictures/Projects/RoboticArm/Demo2.mp4', fit: 'cover' },
         ],
       },
       {
         title: 'BT RC Car Control', id: 'ECE_004', tags: ['Arduino', 'Bluetooth', 'LCD'],
         sub: 'ECE_004 // Embedded',
+        isFavorite: true,
         desc: 'Wireless vehicle control system with real-time telemetry displayed on a mounted LCD interface.',
         details: 'Designed around an Arduino Uno and HC-05 Bluetooth module. Motor control via L298N H-bridge. A 16×2 LCD shows speed and direction in real time. Android app (MIT App Inventor) sends commands over BT serial.',
         images: [
-          'pictures/Projects/BT_car/final.jpg',
-          'pictures/Projects/BT_car/inside1.jpeg',
-          'pictures/Projects/BT_car/inside2.jpeg',
-          'pictures/Projects/BT_car/withoutchassie.jpeg',
+          { src: 'pictures/Projects/BT_car/final.jpg', fit: 'cover' },
+          { src: 'pictures/Projects/BT_car/inside1.jpeg', fit: 'cover' },
+          { src: 'pictures/Projects/BT_car/inside2.jpeg', fit: 'cover' },
+          { src: 'pictures/Projects/BT_car/withoutchassie.jpeg', fit: 'cover' },
         ],
       },
       {
@@ -1080,22 +1086,22 @@ const SchematicSection = () => {
         desc: 'Signal synthesis circuit for frequency multiplication utilizing Phase-Locked Loop (PLL) stability.',
         details: 'Used the CD4046 PLL IC with a CD4017 divide-by-N counter in the feedback loop to achieve integer frequency multiplication (×2, ×4, ×8). Output verified on an oscilloscope with <0.1% frequency error at 10 kHz.',
         images: [
-          '/pictures/Projects/FrequencyMultiplier/final_1.jpeg',
-          '/pictures/Projects/FrequencyMultiplier/test_2.jpeg',
-          '/pictures/Projects/FrequencyMultiplier/ckt_3.jpeg',
+          { src: '/pictures/Projects/FrequencyMultiplier/final_1.jpeg', fit: 'cover' },
+          { src: '/pictures/Projects/FrequencyMultiplier/test_2.jpeg', fit: 'cover' },
+          { src: '/pictures/Projects/FrequencyMultiplier/ckt_3.jpeg', fit: 'cover' },
         ],
       },
       {
-        title: 'Light Screaming Circuit', id: 'ECE_006', tags: ['Oscillator', 'Sensors'],
+        title: 'D Flip FLop - Cadence', id: 'ECE_006', tags: ['Cadence', 'Analog', 'VLSI'],
         sub: 'ECE_006 // Analog',
-        desc: 'Analog oscillator whose audio frequency scales linearly with incident light intensity.',
+        desc: 'Design and simulation of a D flip-flop using Cadence Virtuoso.',
         details: 'Built around a 555 timer in astable mode with an LDR in the RC network. As light increases, resistance drops, raising the oscillation frequency. Output drives a small speaker directly. Fun demo for illustrating RC time constants.',
         images: [
-          '/pictures/Projects/DFlipFlop/flipflop_1.png',
-          '/pictures/Projects/DFlipFlop/test_2.png',
-          '/pictures/Projects/DFlipFlop/nand_3.png',
-          '/pictures/Projects/DFlipFlop/not_4.png',
-          '/pictures/Projects/DFlipFlop/result_5.png',
+          { src: '/pictures/Projects/DFlipFlop/flipflop_1.png', fit: 'cover' },
+          { src: '/pictures/Projects/DFlipFlop/test_2.png', fit: 'cover' },
+          { src: '/pictures/Projects/DFlipFlop/nand_3.png', fit: 'cover' },
+          { src: '/pictures/Projects/DFlipFlop/not_4.png', fit: 'cover' },
+          { src: '/pictures/Projects/DFlipFlop/result_5.png', fit: 'cover' },
         ],
       },
       {
@@ -1104,14 +1110,16 @@ const SchematicSection = () => {
         desc: 'Design and simulation of a RISC processor architecture with full test bench verification.',
         details: 'Implemented a simplified RISC processor in Verilog HDL with a custom instruction set. Designed and verified individual modules (ALU, register file, control unit) and integrated them into a full datapath. Simulated using a complete test bench with waveform analysis.',
         images: [
-          '/pictures/Projects/RISC_processor/designandtest_1.jpg',
-          '/pictures/Projects/RISC_processor/dut_2.jpg',
-          '/pictures/Projects/RISC_processor/result_3.jpg',
+          { src: '/pictures/Projects/RISC_processor/designandtest_1.jpg', fit: 'cover' },
+          { src: '/pictures/Projects/RISC_processor/dut_2.jpg', fit: 'cover' },
+          { src: '/pictures/Projects/RISC_processor/result_3.jpg', fit: 'cover' },
         ],
       },
       {
         title: 'ESP32-Walkman', id: 'ECE_008', tags: ['ESP32', 'Audio', 'Embedded'],
         sub: 'ECE_008 // Embedded Audio',
+        isFavorite: true,
+        isWIP: true,
         desc: 'A portable music player built around the ESP32 microcontroller with wireless capabilities.',
         details: 'Work in progress. Details and photos coming soon.',
         images: [],
@@ -1129,7 +1137,7 @@ const SchematicSection = () => {
            className="mb-24 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-white/10 pb-10"
         >
           <div className="space-y-4">
-            <span className="text-[10px] uppercase tracking-[0.4em] text-emerald-500/40 font-bold block">SECTION_03 // HW_ARCH</span>
+            <span className="text-[10px] uppercase tracking-[0.4em] text-emerald-500/40 font-bold block">SECTION_03 // HardWare_ARCH</span>
             <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white">Project Schematics</h2>
           </div>
         </motion.div>
@@ -1144,10 +1152,21 @@ const SchematicSection = () => {
               transition={{ delay: i * 0.1 }}
               // ── CLICKABLE: opens the detail modal for this project ──
               onClick={() => setActiveProj(proj)}
-              className="group border border-emerald-500/20 bg-black/70 backdrop-blur-md p-8 hover:bg-black/80 hover:border-emerald-500/40 transition-all relative overflow-hidden cursor-pointer"
+              className={`group border bg-black/70 backdrop-blur-md p-8 hover:bg-black/80 transition-all relative overflow-hidden cursor-pointer ${
+                (proj as any).isFavorite
+                  ? 'border-emerald-400/60 hover:border-emerald-300/80 hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]'
+                  : 'border-emerald-500/20 hover:border-emerald-500/40'
+              }`}
             >
               <div className="absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-emerald-500/30 group-hover:border-emerald-500/60 transition-colors" />
               <div className="absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-emerald-500/30 group-hover:border-emerald-500/60 transition-colors" />
+
+              {/* WIP Badge */}
+              {(proj as any).isWIP && (
+                <div className="absolute top-4 right-4 bg-amber-500/20 border border-amber-500/60 px-3 py-1 rounded-lg">
+                  <span className="text-amber-400 text-xs font-bold uppercase tracking-wider">WIP</span>
+                </div>
+              )}
 
               <div className="text-[10px] text-emerald-500/50 mb-8 flex justify-between items-center font-bold">
                 <span className="bg-emerald-950 px-2 py-1 border border-emerald-500/20 uppercase">{(proj as any).id}</span>
@@ -1184,12 +1203,52 @@ const SchematicSection = () => {
 // SKILLS SECTION
 // ─────────────────────────────────────────────────────────────────────────────
 const InterestsSection = () => {
-  const skills = [
-    { title: 'Embedded Systems',    icon: <Cpu className="w-8 h-8" /> },
-    { title: 'VLSI Design',         icon: <CircuitBoard className="w-8 h-8" /> },
-    { title: 'Planning & Teamwork', icon: <Layers className="w-8 h-8" /> },
-    { title: 'Coding',              icon: <Braces className="w-8 h-8" /> },
-    { title: 'Iot',                 icon: <Cable className="w-8 h-8" /> },
+  const skillCategories = [
+    {
+      title: 'HARDWARE',
+      icon: <Cpu className="w-12 h-12" />,
+      skills: [
+        'soldering',
+        'pcb design',
+        'circuit debugging',
+        'embedded systems'
+      ]
+    },
+    {
+      title: 'SOFTWARE',
+      icon: <CircuitBoard className="w-12 h-12" />,
+      skills: [
+        'autodesk fusion',
+        'Siemens Studio 5000',
+        'ROS2 - Iron & Gazebo',
+        'LTspice',
+        'KEIL Microvision',
+        'KiCAD'
+      ]
+    },
+    {
+      title: 'CODE-BASE',
+      icon: <Braces className="w-12 h-12" />,
+      skills: [
+        'System Verilog',
+        'MATLAB',
+        'java',
+        'python',
+        'C / C++',
+        'ladder logic - PLC'
+      ]
+    },
+    {
+      title: 'SOFT SKILLS',
+      icon: <Layers className="w-12 h-12" />,
+      skills: [
+        'Leadership',
+        'Optimisium',
+        'crossfunctional Teamwork',
+        'Relaiable',
+        'Attentive'
+      ]
+    }
   ];
 
   return (
@@ -1205,21 +1264,37 @@ const InterestsSection = () => {
           <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter">Technical Arsenal</h2>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-          {skills.map((item, i) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {skillCategories.map((category, i) => (
             <motion.div
-              key={item.title}
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              key={category.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false }}
               transition={{ delay: i * 0.1 }}
-              className="p-8 bg-black/70 backdrop-blur-md border border-white/10 rounded-2xl flex flex-col items-center text-center group hover:bg-black/80 hover:border-emerald-500/50 transition-all shadow-xl relative overflow-hidden"
+              className="bg-black/90 border border-[#00d492]/30 p-8 flex flex-col items-center transition-all hover:border-[#00d492] rounded-2xl"
             >
-              <div className="p-5 rounded-full bg-[#111111] border border-emerald-500/20 mb-6 group-hover:scale-110 transition-transform">
-                {React.cloneElement(item.icon as React.ReactElement, { className: 'text-emerald-400' })}
+              {/* Icon Circle */}
+              <div className="w-24 h-24 rounded-full border border-[#00d492]/40 flex items-center justify-center mb-6 text-emerald-400 hover:border-[#00d492] transition-all">
+                {category.icon}
               </div>
 
-              <h3 className="text-white font-mono font-bold uppercase tracking-widest text-xs">{item.title}</h3>
+              {/* Title */}
+              <h3 className="text-lg font-black text-white uppercase tracking-widest mb-6 text-center">
+                {category.title}
+              </h3>
+
+              {/* Skills List */}
+              <ul className="w-full flex flex-wrap gap-3 justify-center items-center">
+                {category.skills.map((skill, idx) => (
+                  <li 
+                    key={idx} 
+                    className="border-[1px] border-[#00d492]/60 bg-[#00d492]/5 px-4 py-2 rounded-full text-white text-xs font-mono capitalize tracking-tighter"
+                  >
+                    {skill}
+                  </li>
+                ))}
+              </ul> 
             </motion.div>
           ))}
         </div>
@@ -1249,7 +1324,7 @@ const CertificationsSection = () => {
     { title: 'Abhiyanthriki Organizer',             issuer: 'RSET',               date: 'Oct 2025',     color: 'border-sky-900'    },
     { title: 'Multiple Intercollege Maths Quizzes', issuer: 'Different Colleges', date: '2023-2026',    color: 'border-red-400'    },   
     { title: 'Machine Learning for Engineering and science applications', issuer: 'NPTEL', date: '2026',color: 'border-lime-300'    },
-    { title: 'Bharatham - Art Festival',            issuer: 'RSET',               date: '2025-2026',    color: 'borde-emerald-400'    },
+    { title: 'Bharatham - Art Festival',            issuer: 'RSET',               date: '2025-2026',    color: 'border-rose-600'    },
     { title: 'Embedded Sensing, Actuation and Interfacing Systems', issuer: 'NPTEL', date: '2026',      color: 'border-orange-400'    },
     // ────────────────────────────────────────────────────────────────────────
   ];
@@ -1369,7 +1444,7 @@ const ContactSection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           className="mb-20 text-center"
         >
-          <span className="text-[10px] uppercase tracking-[0.5em] text-emerald-500/40 font-bold block mb-4">SECTION_06 // COMMS_ESTABLISHED</span>
+          <span className="text-[10px] uppercase tracking-[0.5em] text-emerald-500/40 font-bold block mb-4">SECTION_06 // ESTABLISH_COMMS</span>
           <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter">Get In Touch</h2>
         </motion.div>
 
