@@ -1127,6 +1127,7 @@
           desc: 'Design and simulation of a RISC processor architecture with full test bench verification.',
           details: 'Implemented a simplified RISC processor in Verilog HDL with a custom instruction set. Designed and verified individual modules (ALU, register file, control unit) and integrated them into a full datapath. Simulated using a complete test bench..',
           images: [
+            { src: 'https://youtu.be/DztMJs0Imeo', fit: 'cover' },
             { src: '/pictures/Projects/RISC_processor/designandtest_1.jpg', fit: 'cover' },
             { src: '/pictures/Projects/RISC_processor/dut_2.jpg', fit: 'cover' },
             { src: '/pictures/Projects/RISC_processor/result_3.jpg', fit: 'cover' },
