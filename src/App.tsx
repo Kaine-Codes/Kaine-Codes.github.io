@@ -1128,7 +1128,9 @@
           isWIP: true,
           desc: 'A portable music player built around the ESP32 microcontroller with 3 Modes of playing music along with multiple playback options.',
           details: 'The devices has 3 output ways of playing music; Earphones(Aux) mode, Speaker mode and bluetooth mode. currently working on the bluetooth mode which is facing alot of sampling and buffer issues. also the power train failed causing the esp32 and the DAC modules to be fried causing a hault on the project till new components arrive. now pending work includes testing the new power system and implmenting the bluetooth connectivity seamlessly',
-          images: [],
+          images: [
+            { src: '/pictures/Projects/walkman/1.jpeg', fit: 'cover' },
+          ],
         },
       ] as ModalItem[]
     );
