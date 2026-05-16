@@ -811,7 +811,18 @@
                     const src = typeof imgData === 'string' ? imgData : imgData.src;
                     const fit = typeof imgData === 'string' ? 'cover' : imgData.fit;
                     const isVideo = /\.(mp4|webm|ogg|mov)$/i.test(src);
-                    return isVideo ? (
+                    // Detect YouTube URLs and extract video ID
+                    const ytMatch = src.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|watch\?v=))([\w-]+)/);
+                    return ytMatch ? (
+                      <iframe
+                        key={slide}
+                        src={`https://www.youtube.com/embed/${ytMatch[1]}?rel=0`}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        style={{ border: 'none' }}
+                      />
+                    ) : isVideo ? (
                       <video
                         key={slide}
                         src={src}
@@ -887,10 +898,10 @@
             { src: '/pictures/MC_section/hardware internship/1.jpeg', fit: 'cover' },
             { src: '/pictures/MC_section/hardware internship/2.jpeg', fit: 'cover' },
             { src: '/pictures/MC_section/hardware internship/3.jpeg', fit: 'contain' },
-            { src: '/pictures/MC_section/hardware internship/4.mp4', fit: 'cover' },
-            { src: '/pictures/MC_section/hardware internship/5.mp5', fit: 'cover' },
+            { src: 'https://youtu.be/NS4uehionAQ', fit: 'cover' },
+            { src: 'https://youtu.be/lLPZa5bcymY', fit: 'cover' },
             { src: '/pictures/MC_section/hardware internship/6.jpeg', fit: 'cover' },
-            { src: '/pictures/MC_section/hardware internship/7.mp4', fit: 'cover' },
+            { src: 'https://youtu.be/UgoDZ8qMvY4', fit: 'cover' },
             { src: '/pictures/MC_section/hardware internship/8.jpeg', fit: 'cover' },
             { src: '/pictures/MC_section/hardware internship/9.mp4', fit: 'cover' },
             { src: '/pictures/MC_section/hardware internship/10.jpeg', fit: 'cover' },
