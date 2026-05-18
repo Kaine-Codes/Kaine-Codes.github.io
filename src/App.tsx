@@ -226,7 +226,7 @@
             setTimeout(onComplete, 600);
             return 100;
           }
-          return prev + 2.5;
+          return prev + 5;
         });
       }, 15);
       return () => clearInterval(interval);
@@ -669,6 +669,21 @@
             
           </motion.div>
         </div>
+
+        {/* Narrative Quote Box — transition zone */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="absolute bottom-16 right-6 md:right-12 z-20 max-w-xs"
+        >
+          <div className="bg-[#1a1a1a]/85 backdrop-blur-sm border border-white/10 rounded-lg px-5 py-4 shadow-lg">
+            <p className="text-white/80 text-sm leading-relaxed font-sans italic">
+              It started off with curiosity, the habit of making things seemed to be all that I used to think of
+            </p>
+          </div>
+        </motion.div>
       </section>
     );
   };
@@ -1039,6 +1054,21 @@
 
         {/* ── MODAL — renders on top of everything when a card is clicked ── */}
         {activeExp && <DetailModal item={activeExp} onClose={() => setActiveExp(null)} theme="minecraft" />}
+
+        {/* Narrative Quote Box — transition to Projects */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="absolute bottom-16 right-6 md:right-12 z-20 max-w-xs"
+        >
+          <div className="bg-[#1a1a1a]/85 backdrop-blur-sm border border-white/10 rounded-lg px-5 py-4 shadow-lg">
+            <p className="text-white/80 text-sm leading-relaxed font-sans italic">
+              soon physical blocks wasn't enough, i turned to other platforms that helped me build my knowledge in systems and continuity
+            </p>
+          </div>
+        </motion.div>
       </section>
     );
   };
@@ -1215,6 +1245,21 @@
 
         {/* ── MODAL ── */}
         {activeProj && <DetailModal item={activeProj} onClose={() => setActiveProj(null)} />}
+
+        {/* Narrative Quote Box — transition to Skills */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: false }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="absolute bottom-16 right-6 md:right-12 z-20 max-w-xs"
+        >
+          <div className="bg-[#1a1a1a]/85 backdrop-blur-sm border border-white/10 rounded-lg px-5 py-4 shadow-lg">
+            <p className="text-white/80 text-sm leading-relaxed font-sans italic">
+              now here i am turning ideas into physical outputs and hobbies into passion - different tools but same builder
+            </p>
+          </div>
+        </motion.div>
       </section>
     );
   };
