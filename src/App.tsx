@@ -480,7 +480,7 @@
                     <path d={isCircuitOn ? "M 1200,280 L 1250,280" : "M 1200,280 L 1235,255"} fill="none" strokeWidth="6" strokeLinecap="round" className="pointer-events-none" />
                     <rect x="1170" y="250" width="110" height="60" fill="transparent" stroke="none" className="pointer-events-auto cursor-pointer" onClick={() => setIsCircuitOn(!isCircuitOn)} />
                     {/* Switch → right end of red sentence / battery cap */}
-                    <path d="M 1115,280 L 1170,280" fill="none" strokeWidth="6" strokeLinecap="round" />
+                    <path d="M 1120,280 L 1200,280" fill="none" strokeWidth="6" strokeLinecap="round" />
                     {/* Left end of battery → up → left side of DANIEL */}
                     <path d="M 53,280 L 18,280 L 18,203 L 525,203 L 525,102" fill="none" strokeWidth="6" strokeLinecap="round" />
                   </g>
