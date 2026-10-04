@@ -511,7 +511,7 @@
                     {/* Left wire: down from left-end of DANIEL → to left of sentence */}
                     <path d="M 20,60 L 20,140" strokeWidth="4" />
                     {/* Right wire: down from right-end of DANIEL → to right of sentence */}
-                    <path d="M 320,60 L 320,140" strokeWidth="4" />
+                    <path d="M 320,100 L 320,140" strokeWidth="4" />
 
                     {/* Switch — bottom left, between left wire and sentence */}
                     {/* terminal dots */}
