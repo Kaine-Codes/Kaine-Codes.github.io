@@ -470,7 +470,7 @@
                   </defs>
                   <g className="transition-all duration-300" stroke="#080808" filter="url(#glow-wire)">
                     {/* Out of DANIEL (Right Side) → right → resistor → left → switch */}
-                    <path d="M 1015,160 L 1350,160" fill="none" strokeWidth="6" strokeLinecap="round" />
+                    <path d="M 1115,160 L 1350,160" fill="none" strokeWidth="6" strokeLinecap="round" />
                     {/* IEEE Resistor */}
                     <path d="M 1350,160 L 1350,185 L 1335,195 L 1365,205 L 1335,215 L 1365,225 L 1335,235 L 1365,245 L 1350,255 L 1350,280" fill="none" strokeWidth="6" strokeLinejoin="round" />
                     <path d="M 1350,280 L 1250,280" fill="none" strokeWidth="6" strokeLinecap="round" />
@@ -480,7 +480,7 @@
                     <path d={isCircuitOn ? "M 1200,280 L 1250,280" : "M 1200,280 L 1235,255"} fill="none" strokeWidth="6" strokeLinecap="round" className="pointer-events-none" />
                     <rect x="1170" y="250" width="110" height="60" fill="transparent" stroke="none" className="pointer-events-auto cursor-pointer" onClick={() => setIsCircuitOn(!isCircuitOn)} />
                     {/* Switch → right end of red sentence / battery cap */}
-                    <path d="M 1200,280 L 1035,280" fill="none" strokeWidth="6" strokeLinecap="round" />
+                    <path d="M 1000,280 L 1035,280" fill="none" strokeWidth="6" strokeLinecap="round" />
                     {/* Left end of battery → up → left side of DANIEL */}
                     <path d="M 53,280 L 18,280 L 18,203 L 525,203 L 525,102" fill="none" strokeWidth="6" strokeLinecap="round" />
                   </g>
