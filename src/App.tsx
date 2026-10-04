@@ -482,7 +482,7 @@
                     {/* Switch → right end of red sentence / battery cap */}
                     <path d="M 1200,280 L 1035,280" fill="none" strokeWidth="6" strokeLinecap="round" />
                     {/* Left end of battery → up → left side of DANIEL */}
-                    <path d="M 53,280 L 18,280 L 18,203 L 485,203 L 485,102" fill="none" strokeWidth="6" strokeLinecap="round" />
+                    <path d="M 53,280 L 18,280 L 18,203 L 525,203 L 525,102" fill="none" strokeWidth="6" strokeLinecap="round" />
                   </g>
                 </svg>
               )}
