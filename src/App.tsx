@@ -649,7 +649,7 @@
                 My Work
               </button>
               <a 
-                href="https://drive.google.com/file/d/1x6dZd3C1MSOuLO8q5lrje5naXFPYD5gP/view?usp=sharing"
+                href="/Resume_Shine_Daniel.pdf"
                 target="_blank"
                 className="h-16 px-12 lego-button-3d lego-button-3d-blue text-white font-black flex items-center gap-4 uppercase tracking-widest text-lg border-2 border-black/20 cursor-pointer"
               >
