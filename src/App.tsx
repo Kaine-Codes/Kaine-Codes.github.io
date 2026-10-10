@@ -1324,8 +1324,8 @@ const ContactSection = () => {
             }}
           >
             <img
-              // Place the phone image you provided in your public folder and update this path if needed
-              src='/pictures/UI_Elements/phone.png'
+              // Vite serves files in 'public' directly from the root path
+              src="/pictures/UI_Elements/phone.png"
               alt="Floating Telephone"
               className="w-20 md:w-28 opacity-100 pointer-events-none"
               style={{
