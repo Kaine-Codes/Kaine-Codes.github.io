@@ -1,38 +1,25 @@
 # Shine Daniel — Portfolio
 
-Personal portfolio of an Electronics & Communication Engineering student at RSET, Kochi, aspiring VLSI & embedded systems engineer.
+Hi, I'm Shine, an Electronics & Communication Engineering student working towards a career in VLSI and Embedded systems. This is the site where I show my projects, experience and skills.
 
 **Live site:** https://kaine-codes.github.io
 
-## What's inside
+## What you'll find
 
-- **Hero:** Lego-brick intro with a working circuit switch that lights up my name
-- **Experience:** a Minecraft-style redstone trail with a card for each role
-- **Projects:** a circuit-board trail that forks into Embedded, VLSI and All
-- **Skills, certifications and contact:** the rest of the page
+- **Hero:** a Lego-themed intro with a working circuit switch
+- **Experience:** a Minecraft redstone trail through my internships, events and organizing work
+- **Projects:** a circuit-board trail of my hardware, embedded and VLSI builds
+- **Skills and certifications**
+- **Contact**
 
 ## Built with
 
 React, TypeScript, Vite, Tailwind CSS, Motion and Lucide icons.
+and 
+LOVE
 
-## Run it locally
+## Contact
 
-```bash
-npm install
-npm run dev
-```
+Find me on [LinkedIn](https://www.linkedin.com/in/shine-daniel2).
 
-Build for production with `npm run build`.
-
-## Adding content
-
-Open `src/App.tsx`:
-
-- **New project:** copy an object in `PROJECTS`, give it a new `id` (like `ECE_009`) and set `track` to `'Embedded'` or `'VLSI'`. It is placed on the trail automatically.
-- **New experience:** copy an object at the end of `EXPERIENCES`. It is placed on the red trail automatically.
-
-Trail geometry lives in `src/trailLayoutData.ts`.
-
-## Credits
-
-Designed and built by Shine Daniel. © 2026
+© 2026 Shine Daniel
