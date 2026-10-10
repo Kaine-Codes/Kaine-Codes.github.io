@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Trail Layout Editor</title>
+  <style>
+    :root {
+      box-sizing: border-box;
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      --bg: #f3f1ea;
+      --panel: #fff;
+      --text: #1d1b20;
+      --muted: #6b6a66;
+      --border: #d6d3c8;
+      --on: #10b981;
+      --on-text: #04342c;
+      --field: #faf9f5
+    }
+
+    html {
+      scroll-padding-top: env(safe-area-inset-top, 0px)
+    }
+
+    @media (prefers-color-scheme:dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #15140f;
+        --panel: #1f1e18;
+        --text: #ece9df;
+        --muted: #a09d92;
+        --border: #3a382f;
+        --field: #17160f
+      }
+    }
+
+    :root[data-theme="dark"] {
+      --bg: #15140f;
+      --panel: #1f1e18;
+      --text: #ece9df;
+      --muted: #a09d92;
+      --border: #3a382f;
+      --field: #17160f
+    }
+
+    * {
+      box-sizing: border-box
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 14px/1.45 Inter, system-ui, -apple-system, "Segoe UI", sans-serif
+    }
+
+    #app {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 12px
+    }
+
+    #stage {
+      flex: 1;
+      min-width: 0;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      background: #111
+    }
+
+    #svg {
+      display: block;
+      width: 100%;
+      height: auto;
+      touch-action: none;
+      user-select: none
+    }
+
+    #side {
+      width: 330px;
+      flex: none;
+      position: sticky;
+      top: 12px;
+      max-height: calc(100vh - 24px);
+      overflow: auto;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px
+    }
+
+    h1 {
+      font-size: 16px;
+      margin: 0 0 4px
+    }
+
+    h2 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      margin: 16px 0 6px
+    }
+
+    p {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: 12.5px
+    }
+
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 8px
+    }
+
+    button,
+    select {
+      font: inherit;
+      font-size: 12.5px;
+      padding: 5px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--field);
+      color: var(--text);
+      cursor: pointer
+    }
+
+    button.on {
+      background: var(--on);
+      color: var(--on-text);
+      border-color: var(--on)
+    }
+
+    .sl {
+      display: grid;
+      grid-template-columns: 1fr 44px;
+      gap: 2px 8px;
+      align-items: center;
+      margin-bottom: 6px;
+      font-size: 12.5px
+    }
+
+    .sl input {
+      grid-column: 1/3;
+      width: 100%
+    }
+
+    .sl b {
+      text-align: right;
+      font-weight: 500;
+      color: var(--muted)
+    }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      font: 11px/1.35 ui-monospace, Menlo, monospace;
+      background: var(--field);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px
+    }
+
+    .card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12.5px;
+      padding: 3px 0;
+      border-bottom: 1px solid var(--border)
+    }
+
+    @media(max-width:900px) {
+      #app {
+        flex-direction: column
+      }
+
+      #side {
+        width: 100%;
+        position: static;
+        max-height: none
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div id="stage"><svg id="svg" role="img" aria-label="Trail layout canvas"></svg></div>
+    <aside id="side">
+      <h1>Trail layout editor</h1>
+      <p>Drag the white dots to bend a road. Drag cards anywhere. Drag the dashed heading boxes up or down. Pick a road
+        below to edit it. When it looks right, press <b>Copy layout</b> and paste it to Claude.</p>
+      <div id="dyn"></div>
+      <h2>Look and feel</h2>
+      <div id="sl"></div>
+      <h2>Road colour and texture</h2>
+      <div id="styl"></div>
+      <h2>Send this to Claude</h2>
+      <div class="row"><button id="copy" class="on">Copy layout</button><button id="load">Load from box</button><button
+          id="reset">Reset</button></div>
+      <p id="msg">Saved automatically in this browser.</p>
+      <textarea id="json" spellcheck="false"></textarea>
+    </aside>
+  </div>
+  <script>
+    var KEY = 'trail-layout-v1';
+    var EXP = [["Hardware internship", "Magnum Technology Center, Dubai"], ["Vegathon organizer", "ECE Dept & C-DAC"], ["Media member", "RSET Media Team"], ["Technical coordinator", "Electronauts"], ["GIS Mapathon", "NeST Digital & RSET"]];
+    var PROJ = { ECE_001: "Audio Spectrum Analyzer", ECE_002: "4-Bit Binary Adder", ECE_003: "Robotic Arm Sim", ECE_004: "Freq Multiplier", ECE_005: "D Flip Flop - Cadence", ECE_006: "BT RC Car Control", ECE_007: "RISC Processor", ECE_008: "ESP32-Walkman" };
+    var ROADS = { Embedded: { x: 260, ids: [6, 8, 1, 2, 4] }, VLSI: { x: 700, ids: [5, 7] }, All: { x: 1140, ids: [1, 2, 3, 4, 5, 6, 7, 8] } };
+    var BR = Object.keys(ROADS), NAMES = { exp: 'Experiences road', stub: 'Fork stub', Embedded: 'Embedded road', VLSI: 'VLSI road', All: 'All road (every project)' };
+    var SL = [['w', 'Road width', 30, 130, 1], ['t', 'Curve looseness', 0.3, 1.8, 0.05], ['expW', 'Experience card width', 240, 520, 1], ['projW', 'Project card width', 240, 520, 1], ['cardH', 'Card height', 120, 320, 1], ['ay', 'Experiences heading top y', 0, 1500, 10], ['headA', 'Experiences heading height', 120, 420, 1], ['bnd', 'Projects section starts at y', 1200, 4200, 10], ['headB', 'Projects heading height', 160, 460, 1], ['trig', 'Light-up line (% of screen)', 30, 90, 1]];
+    var $ = function (s) { return document.querySelector(s) }, svg = $('#svg');
+
+    var TEX = [['solid', 'Solid'], ['dashed', 'Dashed centre line'], ['pebbles', 'Pebbles'], ['cobble', 'Cobblestone'], ['pixel', 'Pixel blocks'], ['circuit', 'Circuit traces']];
+    function defStyle() { return { A: { edge: '#b8a878', inner: '#f1e7c9', accent: '#8a7a55', tex: 'solid' }, B: { edge: '#b8a878', inner: '#f1e7c9', accent: '#8a7a55', tex: 'solid' } } }
+    function defaults() {
+      var side = function (i) { return i % 2 ? 970 : 430 }, cx = function (x) { return x < 700 ? x - 235 : x + 235 };
+      var S = { w: 64, t: 1, expW: 360, projW: 360, cardH: 190, ay: 0, headA: 260, bnd: 2200, headB: 300, trig: 60, paths: {}, cards: {}, link: true, style: defStyle() };
+      S.paths.exp = [[800, 260]].concat(EXP.map(function (_, i) { return [side(i), 420 + 340 * i] })).concat([[700, 2200]]);
+      S.cards.exp = EXP.map(function (e, i) { return { t: e[0], s: e[1], x: cx(side(i)), y: 420 + 340 * i } });
+      var sy = S.bnd + S.headB, J = [700, sy + 230], EY = J[1] + 300;
+      S.paths.stub = [[700, S.bnd], [740, S.bnd + 160], [760, sy + 10], J];
+      BR.forEach(function (r) {
+        var R = ROADS[r], fl = R.x > 400, a = [J, [(J[0] + R.x) / 2, J[1] + 130], [R.x, EY]]; S.cards[r] = [];
+        R.ids.forEach(function (n, i) { var id = 'ECE_00' + n, sx = ((i % 2 === 0) === fl) ? 430 : 970, y = EY + 340 * (i + 1); a.push([sx, y]); S.cards[r].push({ id: id, t: PROJ[id], s: id, x: cx(sx), y: y }) });
+        a.push([700, a[a.length - 1][1] + 380]); S.paths[r] = a;
+      });
+      return S;
+    }
+    function load() { try { var v = JSON.parse(localStorage.getItem(KEY)); return v && v.paths && v.cards ? v : null } catch (e) { return null } }
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(S)) } catch (e) { } }
+    function migrate(v) {
+      if (v && v.paths && v.cards && v.paths.Robotics && !v.paths.All) {
+        v.paths.All = v.paths.Robotics; delete v.paths.Robotics;
+        var cs = v.cards.Robotics || []; delete v.cards.Robotics;
+        var a = v.paths.All, have = cs.map(function (c) { return c.id }), miss = Object.keys(PROJ).filter(function (id) { return have.indexOf(id) < 0 }), n = Math.max(1, a.length - 2);
+        miss.forEach(function (id, j) { var p = a[1 + Math.floor(j * n / miss.length)]; cs.push({ id: id, t: PROJ[id], s: id, x: p[0], y: p[1] }) });
+        cs.sort(function (p, q) { return p.id < q.id ? -1 : 1 }); v.cards.All = cs;
+      }
+      return v;
+    }
+    var S = migrate(load()) || defaults(), sel = 'exp', mode = 'move', selA = null, drag = null;
+    if (!S.style) S.style = defStyle();
+
+    var J = function () { return S.paths.stub[S.paths.stub.length - 1] };
+    var getA = function (k) { if (BR.indexOf(k) >= 0) return [J()].concat(S.paths[k].slice(1)); if (k === 'stub' && S.link) return [S.paths.exp[S.paths.exp.length - 1]].concat(S.paths.stub.slice(1)); return S.paths[k] };
+    function segs(a) {
+      var r = [], t = S.t / 6; for (var i = 0; i < a.length - 1; i++) {
+        var p0 = a[i - 1] || a[i], p1 = a[i], p2 = a[i + 1], p3 = a[i + 2] || p2;
+        r.push([p1, [p1[0] + (p2[0] - p0[0]) * t, p1[1] + (p2[1] - p0[1]) * t], [p2[0] - (p3[0] - p1[0]) * t, p2[1] - (p3[1] - p1[1]) * t], p2])
+      } return r
+    }
+    var f = function (n) { return Math.round(n * 10) / 10 };
+    function pathD(a) { var s = segs(a); return s.length ? 'M' + a[0][0] + ' ' + a[0][1] + s.map(function (q) { return ' C' + f(q[1][0]) + ' ' + f(q[1][1]) + ' ' + f(q[2][0]) + ' ' + f(q[2][1]) + ' ' + q[3][0] + ' ' + q[3][1] }).join('') : '' }
+    function H() { var m = 3000; for (var k in S.paths) S.paths[k].forEach(function (p) { m = Math.max(m, p[1] + 300) }); return m }
+    function pt(e) { var r = svg.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * 1400, (e.clientY - r.top) / r.height * H()] }
+
+    function pat(k) {
+      var c = S.style[k].accent, t = S.style[k].tex, sz = 28, b = '';
+      if (t === 'pebbles') b = '<circle cx="6" cy="7" r="2.6" fill="' + c + '"/><circle cx="19" cy="12" r="2" fill="' + c + '"/><circle cx="11" cy="22" r="2.8" fill="' + c + '"/><circle cx="24" cy="24" r="1.8" fill="' + c + '"/>';
+      else if (t === 'cobble') { sz = 40; b = [[1, 1], [21, 1], [11, 21], [-9, 21], [31, 21]].map(function (q) { return '<rect x="' + q[0] + '" y="' + q[1] + '" width="18" height="18" rx="4" fill="none" stroke="' + c + '" stroke-width="2.5"/>' }).join('') }
+      else if (t === 'pixel') { sz = 32; b = '<rect width="16" height="16" fill="' + c + '" opacity=".45"/><rect x="16" y="16" width="16" height="16" fill="' + c + '" opacity=".45"/>' }
+      else if (t === 'circuit') { sz = 48; b = '<path d="M0 24H16L24 16H48M24 0V10M30 48V34L36 28H48" fill="none" stroke="' + c + '" stroke-width="2.5"/><circle cx="16" cy="24" r="3.5" fill="' + c + '"/><circle cx="24" cy="12" r="3.5" fill="' + c + '"/><circle cx="36" cy="28" r="3.5" fill="' + c + '"/>' }
+      return '<pattern id="tx' + k + '" width="' + sz + '" height="' + sz + '" patternUnits="userSpaceOnUse">' + b + '</pattern>'
+    }
+    function roadSvg(d) {
+      return ['A', 'B'].map(function (k) {
+        var st = S.style[k], iw = S.w * 0.78, r = '<g clip-path="url(#c' + k + ')"><path d="' + d + '" fill="none" stroke="' + st.edge + '" stroke-width="' + S.w + '" stroke-linecap="round" stroke-linejoin="round"/><path d="' + d + '" fill="none" stroke="' + st.inner + '" stroke-width="' + iw + '" stroke-linecap="round" stroke-linejoin="round"/>';
+        if (st.tex === 'dashed') r += '<path d="' + d + '" fill="none" stroke="' + st.accent + '" stroke-width="4" stroke-dasharray="22 18"/>';
+        else if (st.tex !== 'solid') r += '<path d="' + d + '" fill="none" stroke="url(#tx' + k + ')" stroke-width="' + iw + '" stroke-linecap="round" stroke-linejoin="round"/>';
+        return r + '</g>'
+      }).join('')
+    }
+    function zone(y, h, label, col, id) { return '<g data-k="z" data-z="' + id + '" style="cursor:ns-resize"><rect y="' + y + '" width="1400" height="' + h + '" fill="rgba(0,0,0,.5)" stroke="' + col + '" stroke-width="3" stroke-dasharray="14 10"/><text x="700" y="' + (y + h / 2 + 2) + '" text-anchor="middle" font-size="26" fill="' + col + '" font-family="Inter,sans-serif">' + label + '</text><text x="700" y="' + (y + h / 2 + 32) + '" text-anchor="middle" font-size="16" fill="' + col + '" font-family="Inter,sans-serif">drag up or down to move</text></g>' }
+    function cardSvg(c, key, exp) {
+      var w = exp ? S.expW : S.projW, h = S.cardH, x = c.x - w / 2, y = c.y - h / 2;
+      return '<g data-k="c" data-key="' + key + '" style="cursor:grab"><rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + h + '" rx="' + (exp ? 2 : 12) + '" fill="' + (exp ? '#3d2b1f' : 'rgba(0,0,0,.88)') + '" stroke="' + (exp ? '#0f172a' : '#10b981') + '" stroke-width="' + (exp ? 7 : 3) + '"/>' +
+        '<text x="' + (x + 18) + '" y="' + (y + 44) + '" font-size="24" font-weight="700" fill="#fff" font-family="Inter,sans-serif">' + c.t + '</text>' +
+        '<text x="' + (x + 18) + '" y="' + (y + 74) + '" font-size="15" fill="' + (exp ? '#10b981' : '#34d399') + '" font-family="Inter,sans-serif">' + c.s + '</text>' +
+        '<circle cx="' + c.x + '" cy="' + c.y + '" r="7" fill="#f59e0b"/></g>';
+    }
+    function renderStage() {
+      var h = H(), w = S.w;
+      svg.setAttribute('viewBox', '0 0 1400 ' + h);
+      var o = '<defs><pattern id="pd" width="64" height="64" patternUnits="userSpaceOnUse"><rect width="64" height="64" fill="#4a3424"/><rect width="32" height="32" fill="#3d2b1f"/><rect x="32" y="32" width="32" height="32" fill="#3d2b1f"/></pattern><pattern id="pk" width="24" height="24" patternUnits="userSpaceOnUse"><rect width="24" height="24" fill="#111"/><circle cx="12" cy="12" r="1.3" fill="#0f5a43"/></pattern></defs>';
+      o = o.replace('</defs>', pat('A') + pat('B') + '<clipPath id="cA"><rect width="1400" height="' + S.bnd + '"/></clipPath><clipPath id="cB"><rect y="' + S.bnd + '" width="1400" height="' + h + '"/></clipPath></defs>');
+      o += '<rect width="1400" height="' + S.bnd + '" fill="url(#pd)"/><rect y="' + S.bnd + '" width="1400" height="' + (h - S.bnd) + '" fill="url(#pk)"/>';
+      o += zone(S.ay || 0, S.headA, 'EXPERIENCES heading (stays as it is)', '#10b981', 'a') + zone(S.bnd, S.headB, 'PROJECT SCHEMATICS heading (stays as it is)', '#ffffff', 'b');
+      Object.keys(S.paths).forEach(function (k) {
+        var d = pathD(getA(k)), op = (BR.indexOf(k) >= 0 && k !== sel) ? 0.28 : 1;
+        o += '<g opacity="' + op + '">' + roadSvg(d) + '</g>';
+      });
+      S.cards.exp.forEach(function (c, i) { o += cardSvg(c, 'exp|' + i, true) });
+      if (BR.indexOf(sel) >= 0) S.cards[sel].forEach(function (c, i) { o += cardSvg(c, sel + '|' + i, false) });
+      var a = S.paths[sel], isB = BR.indexOf(sel) >= 0;
+      a.forEach(function (p, i) {
+        if ((isB && i === 0) || (sel === 'stub' && i === a.length - 1) || (S.link && sel === 'stub' && i === 0) || (S.link && sel === 'exp' && i === a.length - 1)) return;
+        o += '<circle data-k="a" data-i="' + i + '" cx="' + p[0] + '" cy="' + p[1] + '" r="17" fill="' + (i === selA ? '#f59e0b' : '#fff') + '" stroke="#111" stroke-width="5" style="cursor:grab"/>';
+      });
+      o += '<circle data-k="j" cx="' + J()[0] + '" cy="' + J()[1] + '" r="24" fill="#10b981" stroke="#04342c" stroke-width="6" style="cursor:grab"/><text x="' + (J()[0] + 34) + '" y="' + (J()[1] + 6) + '" font-size="20" fill="#6ee7b7" font-family="Inter,sans-serif">fork</text>';
+      if (S.link) { var L = S.paths.exp[S.paths.exp.length - 1]; o += '<circle data-k="l" cx="' + L[0] + '" cy="' + L[1] + '" r="22" fill="#f59e0b" stroke="#111" stroke-width="6" style="cursor:grab"/><text x="' + (L[0] + 32) + '" y="' + (L[1] + 6) + '" font-size="20" fill="#fbbf24" font-family="Inter,sans-serif">joined</text>' }
+      svg.innerHTML = o;
+    }
+    function renderDyn() {
+      var h = '<h2>Which road am I editing?</h2><div class="row">' + Object.keys(NAMES).map(function (k) { return '<button data-act="sel" data-v="' + k + '" class="' + (k === sel ? 'on' : '') + '">' + NAMES[k] + '</button>' }).join('') + '</div>';
+      h += '<div class="row"><button data-act="mode" data-v="move" class="' + (mode === 'move' ? 'on' : '') + '">Move dots</button><button data-act="mode" data-v="add" class="' + (mode === 'add' ? 'on' : '') + '">Add a bend</button><button data-act="del">Delete selected dot</button></div>';
+      h += '<div class="row"><button data-act="link" class="' + (S.link ? 'on' : '') + '">Experiences road joined to fork road: ' + (S.link ? 'ON' : 'OFF') + '</button></div>';
+      h += '<p>' + (mode === 'add' ? 'Click on the stage to add a bend to the ' + NAMES[sel] + '.' : 'Click a white dot to select it, drag to move it.') + '</p>';
+      if (BR.indexOf(sel) >= 0) {
+        h += '<h2>Projects on the ' + sel + ' road</h2>' + S.cards[sel].map(function (c, i) { return '<div class="card"><span>' + c.t + '</span><button data-act="rm" data-v="' + i + '">remove</button></div>' }).join('');
+        var have = S.cards[sel].map(function (c) { return c.id }), opts = Object.keys(PROJ).filter(function (id) { return have.indexOf(id) < 0 });
+        if (opts.length) h += '<div class="row" style="margin-top:8px"><select id="addp">' + opts.map(function (id) { return '<option value="' + id + '">' + PROJ[id] + '</option>' }).join('') + '</select><button data-act="add">Add to road</button></div>';
+      }
+      $('#dyn').innerHTML = h; svg.style.cursor = mode === 'add' ? 'crosshair' : 'default';
+    }
+    function exportObj() {
+      var o = {
+        notes: "Units are viewBox units. The road style switches from the experiences style to the projects style at projectsSectionStartsAtY. The stage is 1400 wide, y grows downward. Card x,y are card CENTERS. svgPath strings can be used directly. editorState lets you reload this layout.",
+        stage: { width: 1400, height: H() },
+        sections: { experiencesHeadingTopY: S.ay || 0, experiencesHeadingHeight: S.headA, projectsSectionStartsAtY: S.bnd, projectsHeadingHeight: S.headB },
+        road: { outerWidth: S.w, innerWidth: Math.round(S.w * 0.78), curveLooseness: S.t, lightUpLinePercentOfScreen: S.trig },
+        cardSize: { experience: { w: S.expW, h: S.cardH }, project: { w: S.projW, h: S.cardH } }, roadStyle: { experiencesSection: { edgeColor: S.style.A.edge, fillColor: S.style.A.inner, textureColor: S.style.A.accent, texture: S.style.A.tex }, projectsSection: { edgeColor: S.style.B.edge, fillColor: S.style.B.inner, textureColor: S.style.B.accent, texture: S.style.B.tex } }, roadsJoined: !!S.link, forkJunction: J(), roads: {}
+      };
+      Object.keys(S.paths).forEach(function (k) { var a = getA(k); o.roads[k] = { anchors: a, svgPath: pathD(a), cards: (S.cards[k] || []).map(function (c) { return { id: c.id || null, title: c.t, x: c.x, y: c.y } }) } });
+      o.editorState = S; return o;
+    }
+    function renderJSON() { var t = $('#json'); if (document.activeElement !== t) t.value = JSON.stringify(exportObj(), null, 1) }
+    function all() { renderStage(); renderDyn(); renderJSON(); save() }
+
+    svg.addEventListener('pointerdown', function (e) {
+      var g = e.target.closest('[data-k]'), p = pt(e);
+      if (!g || (mode === 'add' && g.getAttribute('data-k') === 'z')) { if (mode === 'add') addPt(p[0], p[1]); else { selA = null; renderStage() } return }
+      var k = g.getAttribute('data-k');
+      if (k === 'a') { selA = +g.getAttribute('data-i'); drag = { k: 'a', i: selA } }
+      else if (k === 'j') drag = { k: 'j' };
+      else if (k === 'l') drag = { k: 'l' };
+      else if (k === 'z') { var zz = g.getAttribute('data-z'); drag = { k: 'z', z: zz, dy: (zz === 'a' ? (S.ay || 0) : S.bnd) - p[1] } }
+      else { var kk = g.getAttribute('data-key').split('|'), c = S.cards[kk[0]][+kk[1]]; drag = { k: 'c', c: c, dx: c.x - p[0], dy: c.y - p[1] } }
+      renderStage(); e.preventDefault();
+    });
+    addEventListener('pointermove', function (e) {
+      if (!drag) return; var p = pt(e), X = Math.round(Math.max(0, Math.min(1400, p[0]))), Y = Math.round(Math.max(0, p[1]));
+      if (drag.k === 'a') S.paths[sel][drag.i] = [X, Y];
+      else if (drag.k === 'j') S.paths.stub[S.paths.stub.length - 1] = [X, Y];
+      else if (drag.k === 'l') { S.paths.exp[S.paths.exp.length - 1] = [X, Y]; S.paths.stub[0] = [X, Y] }
+      else if (drag.k === 'z') { var v = Math.max(0, Math.round(p[1] + drag.dy)); if (drag.z === 'a') S.ay = v; else S.bnd = v; syncSliders() }
+      else { drag.c.x = Math.round(p[0] + drag.dx); drag.c.y = Math.round(p[1] + drag.dy) }
+      renderStage(); renderJSON();
+    });
+    addEventListener('pointerup', function () { if (drag) { drag = null; save(); renderDyn() } });
+
+    function addPt(x, y) {
+      var s = segs(getA(sel)), best = 1e18, bi = 0;
+      s.forEach(function (q, i) {
+        for (var j = 0; j <= 16; j++) {
+          var t = j / 16, u = 1 - t,
+          px = u * u * u * q[0][0] + 3 * u * u * t * q[1][0] + 3 * u * t * t * q[2][0] + t * t * t * q[3][0], py = u * u * u * q[0][1] + 3 * u * u * t * q[1][1] + 3 * u * t * t * q[2][1] + t * t * t * q[3][1],
+          d = (px - x) * (px - x) + (py - y) * (py - y); if (d < best) { best = d; bi = i }
+        }
+      });
+      S.paths[sel].splice(bi + 1, 0, [Math.round(x), Math.round(y)]); selA = bi + 1; all();
+    }
+    function delA() {
+      if (selA == null) return; var a = S.paths[sel], lock = BR.indexOf(sel) >= 0 ? selA === 0 : (sel === 'stub' && (selA === a.length - 1 || (S.link && selA === 0)));
+      if (lock || a.length <= 2) return; a.splice(selA, 1); selA = null; all();
+    }
+    $('#dyn').addEventListener('click', function (e) {
+      var b = e.target.closest('[data-act]'); if (!b) return; var a = b.getAttribute('data-act'), v = b.getAttribute('data-v');
+      if (a === 'sel') { sel = v; selA = null }
+      else if (a === 'mode') mode = v;
+      else if (a === 'del') return delA();
+      else if (a === 'link') { S.link = !S.link; if (!S.link) S.paths.stub[0] = S.paths.exp[S.paths.exp.length - 1].slice() }
+      else if (a === 'rm') S.cards[sel].splice(+v, 1);
+      else if (a === 'add') { var id = $('#addp').value, a2 = S.paths[sel]; S.cards[sel].push({ id: id, t: PROJ[id], s: id, x: 700, y: a2[a2.length - 2][1] }) }
+      all();
+    });
+    addEventListener('keydown', function (e) { if ((e.key === 'Delete' || e.key === 'Backspace') && !/TEXTAREA|INPUT|SELECT/.test(document.activeElement.tagName)) { e.preventDefault(); delA() } });
+
+    $('#sl').innerHTML = SL.map(function (s) { return '<div class="sl"><label for="s_' + s[0] + '">' + s[1] + '</label><b id="v_' + s[0] + '"></b><input type="range" id="s_' + s[0] + '" min="' + s[2] + '" max="' + s[3] + '" step="' + s[4] + '"></div>' }).join('');
+    function syncSliders() { SL.forEach(function (s) { $('#s_' + s[0]).value = S[s[0]]; $('#v_' + s[0]).textContent = S[s[0]] }) }
+    SL.forEach(function (s) { $('#s_' + s[0]).addEventListener('input', function (e) { S[s[0]] = +e.target.value; $('#v_' + s[0]).textContent = S[s[0]]; renderStage(); renderJSON(); save() }) });
+
+    var SF = [['edge', 'Edge'], ['inner', 'Fill'], ['accent', 'Marks']];
+    $('#styl').innerHTML = [['A', 'Experiences section road'], ['B', 'Projects section road']].map(function (s) { return '<p style="margin:8px 0 4px;color:var(--text);font-weight:500">' + s[1] + '</p><div class="row" style="align-items:center">' + SF.map(function (f) { return '<label style="font-size:12px">' + f[1] + ' <input type="color" id="c_' + s[0] + f[0] + '"></label>' }).join('') + '<select id="t_' + s[0] + '">' + TEX.map(function (t) { return '<option value="' + t[0] + '">' + t[1] + '</option>' }).join('') + '</select></div>' }).join('');
+    function syncStyle() { ['A', 'B'].forEach(function (k) { SF.forEach(function (f) { $('#c_' + k + f[0]).value = S.style[k][f[0]] }); $('#t_' + k).value = S.style[k].tex }) }
+    ['A', 'B'].forEach(function (k) { SF.forEach(function (f) { $('#c_' + k + f[0]).addEventListener('input', function (e) { S.style[k][f[0]] = e.target.value; renderStage(); renderJSON(); save() }) }); $('#t_' + k).addEventListener('change', function (e) { S.style[k].tex = e.target.value; renderStage(); renderJSON(); save() }) });
+    var msg = function (t) { $('#msg').textContent = t };
+    $('#copy').onclick = function () {
+      var t = $('#json'); t.value = JSON.stringify(exportObj(), null, 1);
+      var ok = function () { msg('Copied. Paste it into the chat.') }, fb = function () { t.focus(); t.select(); try { document.execCommand('copy'); ok() } catch (e) { msg('Press Ctrl+C now to copy the selected text.') } };
+      try { navigator.clipboard.writeText(t.value).then(ok, fb) } catch (e) { fb() }
+    };
+    $('#load').onclick = function () {
+      try { var v = JSON.parse($('#json').value); v = migrate(v.editorState || v); if (!v.paths || !v.cards) throw 0; S = v; if (!S.style) S.style = defStyle(); if (!S.paths.All || !S.cards.All) { S = defaults() } sel = 'exp'; selA = null; syncSliders(); syncStyle(); all(); msg('Loaded.') } catch (e) { msg('That text is not a layout I can read.') }
+    };
+    $('#reset').onclick = function () { S = defaults(); sel = 'exp'; selA = null; syncSliders(); syncStyle(); all(); msg('Reset to the starting layout.') };
+
+    syncSliders(); syncStyle(); all();
+  </script>
+</body>
+
+</html>
