@@ -409,7 +409,7 @@ const LegoSection = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             className="inline-block px-4 py-2 bg-[#ffeb3b] text-slate-900 font-bold rounded-lg shadow-[4px_4px_0px_0px_#fbc02d] border-2 border-slate-900 uppercase text-xs tracking-wider"
           >
             Electronics Enthusiast // ECE
@@ -418,7 +418,7 @@ const LegoSection = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             transition={{ delay: 0.1 }}
             className="space-y-4 relative"
           >
@@ -515,7 +515,7 @@ const LegoSection = () => {
                       x: ['-100%', '60%'],
                       opacity: [1, 1, 0]
                     }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     transition={{
                       duration: 1.2,
                       times: [0, 0.6, 1],
@@ -527,10 +527,10 @@ const LegoSection = () => {
                   <motion.div
                     initial={{ opacity: 0 }}
                     whileInView={{ opacity: 1 }}
-                    viewport={{ once: true }}
+                    viewport={{ once: false }}
                     className="absolute inset-0 pointer-events-none"
                   >
-                    {[...Array(3)].map((_, i) => (
+                    {[...Array(6)].map((_, i) => (
                       <motion.div
                         key={i}
                         className="absolute"
@@ -540,7 +540,7 @@ const LegoSection = () => {
                           opacity: [0, 1, 0],
                           rotate: [0, 90, 180]
                         }}
-                        viewport={{ once: true }}
+                        viewport={{ once: false }}
                         transition={{
                           duration: 1.5,
                           repeat: Infinity,
@@ -594,7 +594,7 @@ const LegoSection = () => {
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             transition={{ delay: 0.2 }}
             className="text-slate-800 text-2xl max-w-3xl font-medium leading-relaxed bg-white/40 p-8 rounded-3xl border-4 border-slate-900 shadow-[8px_8px_0px_0px_rgba(0,0,0,0.05)]"
           >
@@ -604,7 +604,7 @@ const LegoSection = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
+            viewport={{ once: false }}
             transition={{ delay: 0.3 }}
             className="flex flex-wrap gap-8 pt-4"
           >
@@ -616,7 +616,7 @@ const LegoSection = () => {
               My Work
             </button>
             <a
-              href="https://drive.google.com/drive/folders/1GmLn_n5drEzTfJ9ztFnm-mnKm6DEZlm8?usp=drive_link"
+              href="https://drive.google.com/file/d/1x6dZd3C1MSOuLO8q5lrje5naXFPYD5gP/view?usp=sharing"
               target="_blank"
               className="h-16 px-12 lego-button-3d lego-button-3d-blue text-white font-black flex items-center gap-4 uppercase tracking-widest text-lg border-2 border-black/20 cursor-pointer"
             >
@@ -629,7 +629,7 @@ const LegoSection = () => {
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
+          viewport={{ once: false }}
           transition={{ delay: 0.4 }}
           className="lg:col-span-4 relative flex justify-center mt-12 lg:mt-0"
         >
@@ -641,7 +641,7 @@ const LegoSection = () => {
       <motion.div
         initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
+        viewport={{ once: false }}
         transition={{ delay: 0.3, duration: 0.6 }}
         className="absolute bottom-16 right-6 md:right-12 z-20 max-w-xs"
       >
@@ -1057,6 +1057,101 @@ const TrailWrapper = () => {
 // ─────────────────────────────────────────────────────────────────────────────
 // SKILLS SECTION
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// HAMMER & ANVIL
+// The anvil stays still; the whole hammer is ONE piece that swings around the bottom end of its handle.
+// When the head lands on the anvil, a few sparks pop out and fall onto the card row below.
+// Everything runs on one CSS loop (LOOP seconds), so the hit and the sparks are always in sync.
+// Tweak: S = overall size, LOOP = seconds per swing, FALL = how far sparks drop to reach the cards.
+// ─────────────────────────────────────────────────────────────────────────────
+const HammerAnvil = () => {
+  const S = 1.15;      // scale (1 = native pixel size)
+  const LOOP = 1.6;    // seconds per swing
+  const SHIFT = 70;    // px the whole scene is moved DOWN (raise this if the top of the hammer gets cut off)
+  // How far the sparks drop (at S=1): from the strike point to the top of the cards, which start 80px below the heading.
+  const FALL = 229 + (80 - SHIFT) / S - 163 + 3;
+  const sparks = [
+    { dx: -70, up: -26, d: 0 }, { dx: -42, up: -38, d: 0.02 }, { dx: -18, up: -30, d: 0.01 },
+    { dx: 14, up: -34, d: 0.03 }, { dx: 40, up: -24, d: 0.015 }, { dx: 66, up: -30, d: 0.025 },
+    { dx: -56, up: -16, d: 0.035 }, { dx: 52, up: -14, d: 0.005 },
+  ];
+  return (
+    <div
+      aria-hidden
+      className="hidden xl:block absolute right-0 pointer-events-none"
+      style={{ width: 168 * S, height: 229 * S, bottom: -SHIFT }}
+    >
+      <style>{`
+        @keyframes ha-swing {
+          0%   { transform: rotate(-8deg);  animation-timing-function: ease-in-out; }
+          35%  { transform: rotate(-1deg);  animation-timing-function: ease-in; }
+          55%  { transform: rotate(-65deg); animation-timing-function: ease-out; }
+          62%  { transform: rotate(-50deg); animation-timing-function: ease-in-out; }
+          100% { transform: rotate(-8deg); }
+        }
+        @keyframes ha-spark-x {
+          0%, 55% { transform: translateX(0); animation-timing-function: ease-out; }
+          92%, 100% { transform: translateX(var(--dx)); }
+        }
+        @keyframes ha-spark-y {
+          0%, 55% { transform: translateY(0); opacity: 0; animation-timing-function: ease-out; }
+          56% { opacity: 1; }
+          63% { transform: translateY(var(--up)); opacity: 1; animation-timing-function: ease-in; }
+          92% { transform: translateY(var(--fall)); opacity: 1; }
+          100% { transform: translateY(var(--fall)); opacity: 0; }
+        }
+        @keyframes ha-flash {
+          0%, 54% { opacity: 0; transform: scale(0.4); }
+          56% { opacity: 1; transform: scale(1); }
+          64%, 100% { opacity: 0; transform: scale(1.6); }
+        }
+      `}</style>
+
+      {/* everything inside is laid out at native size, then scaled as one piece */}
+      <div style={{ position: 'absolute', left: 0, top: 0, width: 168, height: 229, transform: `scale(${S})`, transformOrigin: 'top left' }}>
+        {/* anvil (stationary) */}
+        <img src="/pictures/UI_Elements/anvil.png" alt="" draggable={false}
+          style={{ position: 'absolute', left: 0, top: 161, width: 141, height: 68, imageRendering: 'pixelated', filter: 'drop-shadow(0 0 8px rgba(16,185,129,0.25))' }} />
+
+        {/* hammer: one piece, pivoting about the bottom end of the handle, which is at (95,96) inside the 110x106 image */}
+        <img src="/pictures/UI_Elements/hammer.png" alt="" draggable={false}
+          style={{
+            position: 'absolute', left: 58, top: 0, width: 110, height: 106, imageRendering: 'pixelated',
+            transformOrigin: '95px 96px',
+            animation: `ha-swing ${LOOP}s infinite`,
+          }} />
+
+        {/* impact flash + sparks (start at the strike point, about (74,163)) */}
+        <div style={{ position: 'absolute', left: 74, top: 163, width: 0, height: 0 }}>
+          <div style={{
+            position: 'absolute', left: -14, top: -14, width: 28, height: 28, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(255,240,170,0.95) 0%, rgba(255,160,40,0.5) 45%, transparent 70%)',
+            animation: `ha-flash ${LOOP}s infinite`,
+          }} />
+          {sparks.map((sp, i) => (
+            <div key={i} style={{
+              position: 'absolute', left: 0, top: 0,
+              ['--dx' as any]: `${sp.dx}px`,
+              animation: `ha-spark-x ${LOOP}s infinite`,
+              animationDelay: `${sp.d}s`,
+            }}>
+              <div style={{
+                width: 3, height: 3, marginLeft: -1, marginTop: -1,
+                background: i % 3 === 0 ? '#fff3b0' : i % 3 === 1 ? '#ffb02e' : '#ff7a1a',
+                boxShadow: '0 0 4px rgba(255,170,40,0.9)',
+                ['--up' as any]: `${sp.up}px`,
+                ['--fall' as any]: `${FALL}px`,
+                animation: `ha-spark-y ${LOOP}s infinite`,
+                animationDelay: `${sp.d}s`,
+              }} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const InterestsSection = () => {
   const skillCategories = [
     {
@@ -1113,10 +1208,11 @@ const InterestsSection = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          className="mb-20 text-center"
+          className="mb-20 text-center relative z-20"
         >
           <span className="text-[10px] uppercase tracking-[0.5em] text-emerald-500/40 font-bold block mb-4">SECTION_04 // GUNS OF KNOWLEDGE</span>
           <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter">Technical Arsenal</h2>
+          <HammerAnvil />
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -1125,7 +1221,7 @@ const InterestsSection = () => {
               key={category.title}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ once: false }}
               transition={{ delay: i * 0.1 }}
               className="bg-black/90 border border-[#00d492]/30 p-8 flex flex-col items-center transition-all hover:border-[#00d492] rounded-lg"
             >
@@ -1247,10 +1343,25 @@ const CertificationsSection = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          className="text-center"
+          className="text-center relative"
         >
           <span className="text-[10px] uppercase tracking-[0.5em] text-emerald-500/40 font-bold block mb-4">SECTION_05 // CREDENTIALS</span>
           <h2 className="text-5xl md:text-7xl font-black text-white uppercase tracking-tighter">Certifications</h2>
+
+          {/* Floating Book (same bob as the phone in Contact) */}
+          <motion.div
+            className="absolute top-5 md:top-6 left-0 md:left-20 xl:left-36 pointer-events-none"
+            animate={{ y: [-15, 10, -15] }}
+            transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <img
+              src="/pictures/UI_Elements/book.png"
+              alt=""
+              draggable={false}
+              className="w-20 md:w-28 pointer-events-none"
+              style={{ imageRendering: 'pixelated', filter: 'drop-shadow(0 0 10px rgba(16,185,129,0.3))' }}
+            />
+          </motion.div>
         </motion.div>
       </div>
 
@@ -1324,7 +1435,6 @@ const ContactSection = () => {
             }}
           >
             <img
-              // Vite serves files in 'public' directly from the root path
               src="/pictures/UI_Elements/phone.png"
               alt="Floating Telephone"
               className="w-20 md:w-28 opacity-100 pointer-events-none"
