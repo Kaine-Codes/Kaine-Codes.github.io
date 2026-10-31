@@ -212,8 +212,8 @@
   <script>
     var KEY = 'trail-layout-v1';
     var EXP = [["Hardware internship", "Magnum Technology Center, Dubai"], ["Vegathon organizer", "ECE Dept & C-DAC"], ["Media member", "RSET Media Team"], ["Technical coordinator", "Electronauts"], ["GIS Mapathon", "NeST Digital & RSET"]];
-    var PROJ = { ECE_001: "Audio Spectrum Analyzer", ECE_002: "4-Bit Binary Adder", ECE_003: "Robotic Arm Sim", ECE_004: "Freq Multiplier", ECE_005: "D Flip Flop - Cadence", ECE_006: "BT RC Car Control", ECE_007: "RISC Processor", ECE_008: "ESP32-Walkman" };
-    var ROADS = { Embedded: { x: 260, ids: [6, 8, 1, 2, 4] }, VLSI: { x: 700, ids: [5, 7] }, All: { x: 1140, ids: [1, 2, 3, 4, 5, 6, 7, 8] } };
+    var PROJ = { ECE_001: "Audio Spectrum Analyzer", ECE_002: "4-Bit Binary Adder", ECE_003: "Robotic Arm Sim", ECE_004: "Freq Multiplier", ECE_005: "D Flip Flop - Cadence", ECE_006: "BT RC Car Control", ECE_007: "RISC Processor", ECE_008: "ESP32-Walkman", ECE_009: "LUMINO - Spotify Controller Lamp", ECE_010: "Ouroboros: Bio-Inspired Snake Robot", ECE_011: "8 Bit ALU", ECE_012: "EEG Based Seizure Detection System" };
+    var ROADS = { Embedded: { x: 260, ids: [6, 8, 1, 2, 4, 9, 10, 12] }, VLSI: { x: 700, ids: [5, 7, 11] }, All: { x: 1140, ids: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12] } };
     var BR = Object.keys(ROADS), NAMES = { exp: 'Experiences road', stub: 'Fork stub', Embedded: 'Embedded road', VLSI: 'VLSI road', All: 'All road (every project)' };
     var SL = [['w', 'Road width', 30, 130, 1], ['t', 'Curve looseness', 0.3, 1.8, 0.05], ['expW', 'Experience card width', 240, 520, 1], ['projW', 'Project card width', 240, 520, 1], ['cardH', 'Card height', 120, 320, 1], ['ay', 'Experiences heading top y', 0, 1500, 10], ['headA', 'Experiences heading height', 120, 420, 1], ['bnd', 'Projects section starts at y', 1200, 4200, 10], ['headB', 'Projects heading height', 160, 460, 1], ['trig', 'Light-up line (% of screen)', 30, 90, 1]];
     var $ = function (s) { return document.querySelector(s) }, svg = $('#svg');
@@ -229,7 +229,7 @@
       S.paths.stub = [[700, S.bnd], [740, S.bnd + 160], [760, sy + 10], J];
       BR.forEach(function (r) {
         var R = ROADS[r], fl = R.x > 400, a = [J, [(J[0] + R.x) / 2, J[1] + 130], [R.x, EY]]; S.cards[r] = [];
-        R.ids.forEach(function (n, i) { var id = 'ECE_00' + n, sx = ((i % 2 === 0) === fl) ? 430 : 970, y = EY + 340 * (i + 1); a.push([sx, y]); S.cards[r].push({ id: id, t: PROJ[id], s: id, x: cx(sx), y: y }) });
+        R.ids.forEach(function (n, i) { var id = 'ECE_' + ('00' + n).slice(-3), sx = ((i % 2 === 0) === fl) ? 430 : 970, y = EY + 340 * (i + 1); a.push([sx, y]); S.cards[r].push({ id: id, t: PROJ[id], s: id, x: cx(sx), y: y }) });
         a.push([700, a[a.length - 1][1] + 380]); S.paths[r] = a;
       });
       return S;

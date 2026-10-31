@@ -1037,9 +1037,69 @@ const PROJECTS: ModalItem[] = [
     isFavorite: true,
     isWIP: true,
     desc: 'A portable music player built around the ESP32 microcontroller with 3 Modes of playing music along with multiple playback options.',
-    details: 'The devices has 3 output ways of playing music; Earphones(Aux) mode, Speaker mode and bluetooth mode. currently working on the bluetooth mode which is facing alot of sampling and buffer issues. also the power train failed causing the esp32 and the DAC modules to be fried causing a hault on the project till new components arrive. now pending work includes testing the new power system and implmenting the bluetooth connectivity seamlessly',
+    details: 'The devices has 3 output ways of playing music; Earphones(Aux) mode, Speaker mode and bluetooth mode. currently working on the bluetooth mode which is facing alot of brownout and RAM issues related to the ESP32.',
     images: [
-      { src: '/pictures/Projects/walkman/1.jpeg', fit: 'cover' },
+      { src: '/pictures/Projects/walkman/wepod_demo.mp4', fit: 'cover' },
+      { src: '/pictures/Projects/walkman/wepod1.jpeg', fit: 'cover' },
+      { src: '/pictures/Projects/walkman/wepod2.jpeg', fit: 'cover' },
+    ],
+  },
+  {
+    title: 'LUMINO - Spotify Controller Lamp', id: 'ECE_009', tags: ['ESP32', 'APIs', 'Power Planning', 'Everyday Electronics'],
+    sub: 'ECE_009 // Comfort & Convience',
+    highlight: 'border-amber-400',
+    isFavorite: true,
+    track: 'Embedded',
+    desc: 'Custom built spotify control/ lamp/ pomodoro timer ',
+    details: 'This Lamp is linked to my spotify via a api key and it can perform functions like play/pause/volume control in spotify. along with this it can control a led or a led array(lamp portion) independently. it also has a built in pomodoro timer so that you dont have set a alarm in something like a phone. All the electronics is done, now only the 3d printing the case and final assebly is left.  The ultimate study/desk accessory.',
+    images: [
+      { src: '/pictures/Projects/lumino/3dmodel1.png', fit: 'contain' },
+      { src: '/pictures/Projects/lumino/lumino4.jpeg', fit: 'contain' },
+      { src: '/pictures/Projects/lumino/lumino3.jpeg', fit: 'contain' },
+      { src: '/pictures/Projects/lumino/3dmodel2.png', fit: 'contain' },
+      { src: '/pictures/Projects/lumino/lumino1.jpeg', fit: 'contain' },
+    ],
+  },
+  {
+    title: 'Ouroboros: Bio-Inspired Snake Robot', id: 'ECE_010', tags: ['Raspberry Pi Pico, ESP32, MPU6050'],
+    sub: 'ECE_010 // ',
+    highlight: 'border-amber-400',
+    track: 'Embedded',
+    desc: 'developed a semi functional prototpye for a helical snake robot: concept proof. ',
+    details: 'Developed a bio-inspired helical snake robot for autonomous navigation in confined and irregular terrains, featuring three articulated segments and five geared motors with integrated IMU sensing. Implemented UART-based control and a web dashboard for real-time monitoring and maneuverability',
+    images: [
+      { src: '/pictures/Projects/ouroborus/dashboard_view_3.jpeg', fit: 'cover' },
+      { src: '/pictures/Projects/ouroborus/electronics_prototype_actual.jpeg', fit: 'contain' },
+      { src: '/pictures/Projects/ouroborus/model1.png', fit: 'contain' },
+      { src: '/pictures/Projects/ouroborus/jointcap.png', fit: 'cover' },
+      { src: '/pictures/Projects/ouroborus/joint_full_assembly.jpeg', fit: 'contain' },
+      { src: '/pictures/Projects/ouroborus/system_block_diagram_actual.jpeg', fit: 'contain' },
+    ],
+  },
+  {
+    title: '8 Bit ALU', id: 'ECE_011', tags: ['RTL to GDS, Cadence, Vivado'],
+    sub: 'ECE_011 // ',
+    highlight: 'border-amber-400',
+    track: 'VLSI',
+    isWIP: true,
+    desc: '8bit ALU with flagging and basic functoinality.',
+    details: 'Currently work in progress. Implemented and tested the RTL code, will have to test the LVS, DRC and QRC using openroad for the full implementation, also planning to do transient analysis in cadence. The ALU has shifting, logical operations(AND, OR, XOR),flagging functiosn(zero, carry, overflow, negative) and arthmetic operations(Addition and Subtraction, multiplication and division is optional since its much larger)',
+    images: [
+      { src: '/pictures/Projects/alu/', fit: 'contain' },
+      { src: '/pictures/Projects/alu/', fit: 'contain' },
+    ],
+  },
+  {
+    title: 'EEG Based Seizure Detection System in Edge Hardware', id: 'ECE_012', tags: ['Rasberry pi 5, ADS1299, Biomedical'],
+    sub: 'ECE_012 // ',
+    highlight: 'border-amber-400',
+    track: 'Embedded',
+    isFavorite: true,
+    isWIP: true,
+    desc: 'Light Weight TCN model that classifies temporal stages based on EEG data.',
+    details: 'Currently work in progress. Developing a efficient system that will process raw EEG data, feed it to a LightWeight TCN model using depthwise seperable convolution and then display the result in a dashboard ... all running in a edge hardware.',
+    images: [
+      { src: '/pictures/Projects/mainproj/eeg_tcn_best_weights.png', fit: 'contain' },
     ],
   },
 ];
@@ -1637,7 +1697,7 @@ export default function App() {
           <footer className="bg-[#0a0a0a] py-20 text-slate-500 font-mono border-t border-white/5">
             <div className="max-w-7xl mx-auto px-6 md:px-12 text-center">
               <div className="mb-12">
-                <div className="text-8xl font-black text-white/5 select-none leading-none">Lets Cook ;D</div>
+                <div className="text-8xl font-black text-white/10 select-none leading-none">Lets Cook ;D</div>
               </div>
               <div className="flex flex-col md:flex-row justify-between items-center gap-8 text-[10px] uppercase font-bold tracking-[0.4em]">
                 <div className="flex items-center gap-4">

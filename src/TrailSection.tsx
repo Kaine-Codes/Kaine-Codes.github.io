@@ -120,11 +120,7 @@ const BLEND_HALF_HEIGHT = 260; // band reaches this far above AND below the sect
 // so by default we fake it with two wide see-through strokes. Set true to use the original blur.
 const USE_BLUR_GLOW = false;
 const BLEND_PIXEL = 8;         // size of each pixel in the band (smaller = finer, 8 = very fine)
-// Areas (stage units) where the blend is switched OFF, so the road stays pure red there.
-// The edge facing the green side fades out over `fade` units. Add more rectangles to the list if needed.
-const NO_PIXEL_ZONES = [
-  { x0: 300, x1: 640, y0: 1320, y1: 1500, fade: 80 },
-];
+const NO_PIXEL_ZONES: { x0: number; x1: number; y0: number; y1: number; fade: number }[] = [];
 const hash2 = (a: number, b: number) => {
   const v = Math.sin(a * 127.1 + b * 311.7) * 43758.5453;
   return v - Math.floor(v);
@@ -146,6 +142,241 @@ const dash = (f: number) => ({
   strokeDasharray: `${f} 2`,
   strokeOpacity: f > 0.001 ? 1 : 0,
 });
+
+// ── FLOATING DECORATIONS ─────────────────────────────────────────────────────
+const BOTTLE_SRC = '/pictures/UI_Elements/experience.gif';
+const CHIP_SRC = '/pictures/UI_Elements/robott.png';
+
+// Bottle o' Enchanting (Experiences heading): bobs up/down, sways left/right, and flips now and then,
+// accompanied by authentic Minecraft potion swirl particles, XP orbs, and enchantment table runes floating up.
+const FLIP_EVERY = 6;
+const BOTTLE_LIFT = 30;
+
+const POTION_PARTICLES = [
+  { x: -16, y: 12, size: 5, color: '#a6ff54', glow: '#55ff55', delay: 0.0, dur: 2.8, dx: -14, type: 'orb' },
+  { x: 14, y: 18, size: 4, color: '#ffe838', glow: '#ffff55', delay: 0.5, dur: 3.1, dx: 14, type: 'orb' },
+  { x: -6, y: -6, size: 7, color: '#38ffdc', glow: '#00ffff', delay: 1.1, dur: 2.9, dx: -8, type: 'rune', char: 'ᔑ' },
+  { x: 18, y: -2, size: 5, color: '#c084fc', glow: '#d946ef', delay: 1.6, dur: 3.4, dx: 12, type: 'orb' },
+  { x: -20, y: 22, size: 4, color: '#ffe838', glow: '#ffff55', delay: 2.2, dur: 3.0, dx: -16, type: 'orb' },
+  { x: 6, y: 14, size: 7, color: '#a6ff54', glow: '#55ff55', delay: 2.7, dur: 2.7, dx: 10, type: 'rune', char: '✦' },
+  { x: -2, y: 28, size: 5, color: '#34d399', glow: '#10b981', delay: 3.3, dur: 3.3, dx: -6, type: 'orb' },
+  { x: 16, y: 32, size: 4, color: '#f472b6', glow: '#ec4899', delay: 3.8, dur: 3.1, dx: 16, type: 'orb' },
+  { x: -12, y: 2, size: 7, color: '#ffe838', glow: '#ffff55', delay: 4.4, dur: 2.9, dx: -12, type: 'rune', char: 'ᦔ' },
+  { x: 8, y: -12, size: 5, color: '#a6ff54', glow: '#55ff55', delay: 5.0, dur: 3.2, dx: 8, type: 'orb' },
+];
+
+const EnchantBottle = () => (
+  <div aria-hidden className="hidden md:flex self-end shrink-0 pointer-events-none" style={{ perspective: 600, marginBottom: BOTTLE_LIFT }}>
+    <style>{`
+      @keyframes mc-potion-rise {
+        0% {
+          transform: translate(0, 0) scale(0.4) rotate(0deg);
+          opacity: 0;
+        }
+        15% {
+          opacity: 0.95;
+          transform: translate(calc(var(--pdx) * 0.4), -18px) scale(1) rotate(45deg);
+        }
+        50% {
+          opacity: 1;
+          transform: translate(calc(var(--pdx) * -0.6), -45px) scale(1.15) rotate(90deg);
+        }
+        85% {
+          opacity: 0.75;
+          transform: translate(calc(var(--pdx) * 0.8), -72px) scale(0.85) rotate(135deg);
+        }
+        100% {
+          transform: translate(var(--pdx), -95px) scale(0.2) rotate(180deg);
+          opacity: 0;
+        }
+      }
+    `}</style>
+    <motion.div animate={{ y: [-10, 8, -10] }} transition={{ duration: 6.4, repeat: Infinity, ease: 'easeInOut' }}>
+      <motion.div className="relative" animate={{ x: [-9, 9, -9], rotate: [-5, 10, -5] }} transition={{ duration: 4.6, repeat: Infinity, ease: 'easeInOut' }}>
+
+        {/* Floating Potion Particles & XP Orbs */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+          {POTION_PARTICLES.map((p, i) => (
+            <div
+              key={`potion-particle-${i}`}
+              style={{
+                position: 'absolute',
+                left: `calc(50% + ${p.x}px)`,
+                top: `calc(50% + ${p.y}px)`,
+                ['--pdx' as any]: `${p.dx}px`,
+                animation: `mc-potion-rise ${p.dur}s infinite ease-out`,
+                animationDelay: `${p.delay}s`,
+                pointerEvents: 'none',
+              }}
+            >
+              {p.type === 'orb' ? (
+                <div
+                  style={{
+                    width: p.size,
+                    height: p.size,
+                    background: p.color,
+                    boxShadow: `0 0 6px ${p.glow}, 0 0 2px #fff`,
+                    transform: 'rotate(45deg)',
+                    imageRendering: 'pixelated',
+                  }}
+                />
+              ) : (
+                <span
+                  style={{
+                    fontSize: `${p.size * 2}px`,
+                    color: p.color,
+                    textShadow: `0 0 8px ${p.glow}`,
+                    fontFamily: 'monospace',
+                    fontWeight: 'bold',
+                    lineHeight: 1,
+                    display: 'block',
+                    userSelect: 'none',
+                  }}
+                >
+                  {p.char}
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* The Enchantment Bottle Image */}
+        <motion.img
+          src={BOTTLE_SRC}
+          alt=""
+          draggable={false}
+          className="relative z-10 w-20 md:w-22 pointer-events-none"
+          style={{ imageRendering: 'pixelated', filter: 'drop-shadow(0 0 12px rgba(160,255,120,0.45))' }}
+          animate={{ rotateY: [0, 0, 360] }}
+          transition={{ duration: FLIP_EVERY, times: [0, 0.9, 1], repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </motion.div>
+    </motion.div>
+  </div>
+);
+
+// Robot (Projects heading): floats with animated sparks firing simultaneously from BOTH ears.
+const ROBOT_LOOP = 4.2;
+const ROBOT_SPARK_LEFT_AT = { l: 0, t: 65 };
+const ROBOT_SPARK_RIGHT_AT = { l: 100, t: 50 };
+const ROBOT_FALL = 60;
+const ROBOT_LIFT = 8;
+
+const ROBOT_SPARKS_LEFT = [
+  { dx: -46, up: -26, d: 0 },
+  { dx: -28, up: -36, d: 0.02 },
+  { dx: -10, up: -30, d: 0.01 },
+  { dx: -18, up: -34, d: 0.03 },
+  { dx: -38, up: -24, d: 0.015 },
+  { dx: -46, up: -30, d: 0.025 },
+  { dx: -38, up: -14, d: 0.035 },
+  { dx: -26, up: -16, d: 0.005 },
+];
+
+const ROBOT_SPARKS_RIGHT = [
+  { dx: 40, up: -26, d: 0 },
+  { dx: 22, up: -36, d: 0.02 },
+  { dx: 4, up: -30, d: 0.01 },
+  { dx: 12, up: -34, d: 0.03 },
+  { dx: 32, up: -24, d: 0.015 },
+  { dx: 40, up: -30, d: 0.025 },
+  { dx: 32, up: -14, d: 0.035 },
+  { dx: 20, up: -16, d: 0.005 },
+];
+
+const FloatingChip = () => (
+  <div aria-hidden className="hidden md:block self-end shrink-0 pointer-events-none" style={{ marginBottom: ROBOT_LIFT }}>
+    <style>{`
+      /* BOTH EARS SPARK SIMULTANEOUSLY */
+      @keyframes robot-spark-x-left {
+        0%        { transform: translateX(0); animation-timing-function: ease-out; }
+        32%, 100% { transform: translateX(var(--dx)); }
+      }
+      @keyframes robot-spark-x-right {
+        0%        { transform: translateX(0); animation-timing-function: ease-out; }
+        32%, 100% { transform: translateX(var(--dx)); }
+      }
+      @keyframes robot-spark-y {
+        0%        { transform: translateY(0); opacity: 0; animation-timing-function: ease-out; }
+        2%        { opacity: 1; }
+        9%        { transform: translateY(var(--up)); opacity: 1; animation-timing-function: ease-in; }
+        32%       { transform: translateY(var(--fall)); opacity: 1; }
+        40%, 100% { transform: translateY(var(--fall)); opacity: 0; }
+      }
+      @keyframes robot-flash {
+        0%        { opacity: 1; transform: scale(0.4); }
+        6%        { opacity: 1; transform: scale(1); }
+        14%, 100% { opacity: 0; transform: scale(1.6); }
+      }
+    `}</style>
+    <motion.div animate={{ y: [-10, 8, -10] }} transition={{ duration: 6.4, repeat: Infinity, ease: 'easeInOut' }}>
+      <motion.div className="relative" animate={{ x: [-9, 9, -9], rotate: [-5, 10, -5] }} transition={{ duration: 4.6, repeat: Infinity, ease: 'easeInOut' }}>
+        <img
+          src={CHIP_SRC}
+          alt=""
+          draggable={false}
+          className="block w-27 pointer-events-none"
+          style={{ filter: 'drop-shadow(0 0 10px rgba(16,185,129,0.35))' }}
+        />
+
+        {/* ── LEFT EAR SPARK ── */}
+        <div style={{ position: 'absolute', left: `${ROBOT_SPARK_LEFT_AT.l}%`, top: `${ROBOT_SPARK_LEFT_AT.t}%`, width: 0, height: 0 }}>
+          <div style={{
+            position: 'absolute', left: -14, top: -14, width: 28, height: 28, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(210,246,255,0.95) 0%, rgba(56,189,248,0.5) 45%, transparent 70%)',
+            animation: `robot-flash ${ROBOT_LOOP}s infinite`,
+          }} />
+          {ROBOT_SPARKS_LEFT.map((sp, i) => (
+            <div key={`left-spark-${i}`} style={{
+              position: 'absolute', left: 0, top: 0,
+              ['--dx' as any]: `${sp.dx}px`,
+              animation: `robot-spark-x-left ${ROBOT_LOOP}s infinite`,
+              animationDelay: `${sp.d}s`,
+            }}>
+              <div style={{
+                width: 3, height: 3, marginLeft: -1, marginTop: -1,
+                background: i % 3 === 0 ? '#e0faff' : i % 3 === 1 ? '#54d7ff' : '#2aa9e0',
+                boxShadow: '0 0 4px rgba(84,215,255,0.9)',
+                ['--up' as any]: `${sp.up}px`,
+                ['--fall' as any]: `${ROBOT_FALL}px`,
+                animation: `robot-spark-y ${ROBOT_LOOP}s infinite`,
+                animationDelay: `${sp.d}s`,
+              }} />
+            </div>
+          ))}
+        </div>
+
+        {/* ── RIGHT EAR SPARK ── */}
+        <div style={{ position: 'absolute', left: `${ROBOT_SPARK_RIGHT_AT.l}%`, top: `${ROBOT_SPARK_RIGHT_AT.t}%`, width: 0, height: 0 }}>
+          <div style={{
+            position: 'absolute', left: -14, top: -14, width: 28, height: 28, borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(210,246,255,0.95) 0%, rgba(56,189,248,0.5) 45%, transparent 70%)',
+            animation: `robot-flash ${ROBOT_LOOP}s infinite`,
+          }} />
+          {ROBOT_SPARKS_RIGHT.map((sp, i) => (
+            <div key={`right-spark-${i}`} style={{
+              position: 'absolute', left: 0, top: 0,
+              ['--dx' as any]: `${sp.dx}px`,
+              animation: `robot-spark-x-right ${ROBOT_LOOP}s infinite`,
+              animationDelay: `${sp.d}s`,
+            }}>
+              <div style={{
+                width: 3, height: 3, marginLeft: -1, marginTop: -1,
+                background: i % 3 === 0 ? '#e0faff' : i % 3 === 1 ? '#54d7ff' : '#2aa9e0',
+                boxShadow: '0 0 4px rgba(84,215,255,0.9)',
+                ['--up' as any]: `${sp.up}px`,
+                ['--fall' as any]: `${ROBOT_FALL}px`,
+                animation: `robot-spark-y ${ROBOT_LOOP}s infinite`,
+                animationDelay: `${sp.d}s`,
+              }} />
+            </div>
+          ))}
+        </div>
+
+      </motion.div>
+    </motion.div>
+  </div>
+);
 
 // ── CARDS ─────────────────────────────────────────────────────────────────────
 // Separate memoised components so scrolling (which changes the light-up line constantly) does not
@@ -331,7 +562,7 @@ export default function TrailSection({ experiences, projects, onOpen }: Props) {
       flush(cols);
     }
     return { top, bottom, redD, greenD };
-  }, []);
+  }, [sections.projectsSectionStartsAtY, W]);
 
   const profiles = useMemo(() => {
     const out: Record<string, Profile> = {};
@@ -368,7 +599,7 @@ export default function TrailSection({ experiences, projects, onOpen }: Props) {
     // Heads-up in the console if the red road is too full and cards start overlapping.
     for (let i = 0; i < expCards.length; i++) for (let j = i + 1; j < expCards.length; j++) {
       if (Math.abs(expCards[i].x - expCards[j].x) < ew * 0.9 && Math.abs(expCards[i].y - expCards[j].y) < eh * 0.9) {
-        console.warn(`[TrailSection] Experience cards "${expCards[i].title}" and "${expCards[j].title}" overlap — the red road is full. Increase stage height / road length in trailLayoutData.ts.`);
+        console.warn(`[TrailSection] Experience cards "${expCards[i].title}" and "${expCards[j].title}" overlap.`);
       }
     }
 
@@ -520,11 +751,12 @@ export default function TrailSection({ experiences, projects, onOpen }: Props) {
           {/* ── ROADS ──
             Layer order matters: (1) smooth outlines, (2) dim fills, (3) lit fills + glow.
             Only the INNER fill (2 and 3) is pixelated by the red/green clips; outlines are never pixelated,
-            so nothing pokes out past the edge of the road. */}
+            so nothing pokes out past the edge of the road.
+            roads.exp.svgPath seamlessly spans from Y=260 all the way down to Y=2655 (fork junction),
+            avoiding any rounded cap or stroke seam at the section boundary. */}
           {(() => {
             const pcb = [
               { key: 'exp', d: roads.exp.svgPath },
-              { key: 'stub', d: roads.stub.svgPath },
               ...activeProjPaths.map(name => ({ key: name, d: (roads as any)[name].svgPath })),
             ];
             return (
@@ -616,6 +848,7 @@ export default function TrailSection({ experiences, projects, onOpen }: Props) {
                   Enchantment_Level XXX// Professional_Experience
                 </p>
               </div>
+              <EnchantBottle />
             </div>
             <div className="flex gap-2">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -628,13 +861,16 @@ export default function TrailSection({ experiences, projects, onOpen }: Props) {
         {/* ── PROJECTS HEADING & FORK ── */}
         <div className="absolute w-full px-6 md:px-12 z-20 pointer-events-none" style={{ top: py(sections.projectsSectionStartsAtY) }}>
           <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} viewport={{ once: true }} className="flex flex-col md:flex-row justify-between items-start md:items-end border-b border-white/10 pb-10 pointer-events-auto max-w-7xl mx-auto pt-16">
-            <div className="space-y-4">
-              <span className="text-[10px] uppercase tracking-[0.4em] text-emerald-500/40 font-bold block">
-                SECTION_03 // HardWare_ARCH
-              </span>
-              <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white">
-                Project Schematics
-              </h2>
+            <div className="flex items-end gap-6">
+              <div className="space-y-4">
+                <span className="text-[10px] uppercase tracking-[0.4em] text-emerald-500/40 font-bold block">
+                  SECTION_03 // HardWare_ARCH
+                </span>
+                <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white">
+                  Project Schematics
+                </h2>
+              </div>
+              <FloatingChip />
             </div>
           </motion.div>
 
